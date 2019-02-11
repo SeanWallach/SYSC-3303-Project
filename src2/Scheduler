@@ -104,7 +104,7 @@ public class Scheduler {
 		int toFloor = 0;
 		byte data[] = new byte[PACKETSIZE];
 		receivePacket = new DatagramPacket(data, data.length);
-		System.out.println("Scheduler: Waiting for Packet from User.\n");
+		System.out.println("Scheduler: Waiting for Packet.\n");
 
 		// Block until a datagram packet is received from receiveSocket.
 		try {        
@@ -127,11 +127,38 @@ public class Scheduler {
 		int len = receivePacket.getLength();
 		System.out.println("Length: " + len);
 		System.out.print("Containing: " );
-		System.out.println(new String(this.receivePacket.getData()));
+		System.out.println(this.receivePacket.getData());
 
 		//decode request and assign toFloor as the floor that will be sent to elevator
+		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3) { //received from elevator
+			System.out.println("Received from elevator");
+			int elevatorNumber = data[0];
+			int floorDecode = data[2];
+			int currFloor;
+			if(floorDecode == 0) {
+				currFloor = data[3];
+			}
+			else {
+				currFloor = data[3] + 10;
+			}
+			//update the correct elevator
+			switch(elevatorNumber) {
+			default:
+				//direction: 0 = stop; 1 = up; 2 = down
+				elevatorState1 = data[1];
+				elevatorFloor1 = currFloor;
+			case 2: 
+				elevatorState2 = data[1];
+				elevatorFloor2 = currFloor;
+			case 3:
+				elevatorState3 = data[1];
+				elevatorFloor3 = currFloor;
+			}
 
-		if(fromPort == FLOORPORT) { //1 is arbitrary (from client/Button)
+
+
+		}
+		else { //1 is arbitrary (from client/Button)
 			System.out.println("recieved from floor");
 			byte msg[] = new byte[PACKETSIZE];
 			msg[0] = data[0]; //direction
@@ -160,34 +187,7 @@ public class Scheduler {
 			// System.out.println(received);
 		}
 		//decode data packet from elevator and update status bars for elevators
-		else { //received from elevator
-			System.out.println("Received from elevator");
-			int elevatorNumber = data[0];
-			int floorDecode = data[2];
-			int currFloor;
-			if(floorDecode == 0) {
-				currFloor = data[3];
-			}
-			else {
-				currFloor = data[3] + 10;
-			}
-			//update the correct elevator
-			switch(elevatorNumber) {
-			default:
-				//direction: 0 = stop; 1 = up; 2 = down
-				elevatorState1 = data[1];
-				elevatorFloor1 = currFloor;
-			case 2: 
-				elevatorState2 = data[1];
-				elevatorFloor2 = currFloor;
-			case 3:
-				elevatorState3 = data[1];
-				elevatorFloor3 = currFloor;
-			}
-
-
-
-		}
+		
 
 		// Slow things down (wait 2 seconds)
 		try {
@@ -210,11 +210,14 @@ public class Scheduler {
 
 
 
-		// We're finished, so close the sockets.
-		sendSocket.close();
-		receiveSocket.close();
+		
 	}
 
+	void shutdownSystem() {
+		receiveSocket.close();
+		sendSocket.close();
+		System.exit(1);
+	}
 	void updateDate() {
 		currentDate = new Date();
 	}
