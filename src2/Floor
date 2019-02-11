@@ -15,7 +15,7 @@ public class Floor {
 	
 	static String fileName = ".//input.txt";
 	static int numOfFloors = 10;
-	static int SCHEDULER_PORT = 219, SELFPORT = 248;
+	static int SCHEDULER_PORT = 219, SELFPORT = 238;
 	static String temp;
 	static List<String> allLines;       // input file content
 	
