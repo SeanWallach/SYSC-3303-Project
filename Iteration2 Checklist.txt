@@ -2,6 +2,7 @@ Iteration 2 Checklist
 
 - figure out how to properly organize requests with beginning floor and end floor
 - itegrate end floor into communication between systems (Sean)
+- fix reading input.txt 
 - elevator send information back to scheduler when asked by scheduler OR when it reaches a florr
 - get scheduler -> floor communication to work (Sean)
 - add 2 more elevators
