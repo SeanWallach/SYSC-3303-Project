@@ -22,9 +22,10 @@ public class Elevator {
 	private int currentFloor; //2 is lobby
 	private Receiver link;
 	private int SEND_PORT_NUMBER = 219; //schedualer port
+	private DatagramSocket sendSocket;
 	
 	private ArrayList<Integer> serviceQueue; //floors that will be serviced in organized order
-	private ArrayList<Integer> tempQueue; //floors in opposite direction waiting to be serviced 
+	 
 	
 	public Elevator(int floors, int elevatorNum) {
 		this.bottomFloor = 1;
@@ -37,7 +38,6 @@ public class Elevator {
 		this.motor = 0x0;
 		this.door = false;
 		this.currentFloor = 0x2;	
-		tempQueue = new ArrayList<Integer>();
 		lamp = new ArrayList<Integer>();
 	
 	}
@@ -50,18 +50,7 @@ public class Elevator {
 	public void organizeQueue() { //organizes the queue in to a sequential servicing order 
 		//ArrayList<Floor> temp = link.
 		if(link.newFloor.isEmpty()) {
-		/*	if(!tempQueue.isEmpty()) {						//this will only be needed when temp wueue logic is implemented
-				this.serviceQueue = this.tempQueue;
-				this.tempQueue.clear();
-				if(this.tempQueue.get(0)>this.currentFloor) {
-					this.motor = 1;
-				}
-				else {this.motor = 2;}
-			}
-			else {        */
 				this.motor = 0;
-			//	}
-		
 		}
 		else {
 			for(int i=0;i<link.newFloor.size();i++) {  //for now all request in newFloor are added to service
@@ -80,9 +69,10 @@ public class Elevator {
 		}
 	}
 	
-	public void service() throws IOException { //moves the elevator through queue to service requests 
+	public void service() { //moves the elevator through queue to service requests 
 		
 		while(!this.serviceQueue.isEmpty()) {
+			System.out.println("servicing floor request");
 			if(this.currentFloor == this.serviceQueue.get(0)) {
 				this.motor = 0;
 				this.door = true;
@@ -97,7 +87,7 @@ public class Elevator {
 			else {this.currentFloor--;}
 		}
 		this.motor = 0;
-		
+		System.out.println("Arrived at destination");
 		this.sendRequest(this.currentFloor, this.motor);
 	}
 	
@@ -117,8 +107,8 @@ public class Elevator {
 		this.sendRequest(this.currentFloor, this.motor);
 	}*/
 	
-	public void sendRequest(int currFloor,int direction) throws IOException { //send new internal requests to the scheduler data-> ID,direction,floor,floor
-		DatagramSocket sendSocket = new DatagramSocket();
+	public void sendRequest(int currFloor,int direction) { //send new internal requests to the scheduler data-> ID,direction,floor,floor
+		
 		byte data[] = new byte[4];
 		data[0] = (byte) direction;
 		data[1] = (byte) currFloor;
@@ -133,14 +123,28 @@ public class Elevator {
 	    	  sendSocket.close();
 	         se.printStackTrace();
 	         System.exit(1);
-	      }
+	      } catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
-	public static void main(String[] args) throws IOException {
-		
+	public static void main(String[] args)  {
+		System.out.println("elev starting");
 		Receiver link = new Receiver(69);
-		link.run();
+		link.start();
 		Elevator elevator = new Elevator(6,2);
+		try {
+		elevator.sendSocket = new DatagramSocket();
+		}catch(Exception e) {
+			System.out.println(e);
+		}
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		while(true) {
 			elevator.organizeQueue();
 			elevator.service();
