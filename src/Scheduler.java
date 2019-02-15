@@ -15,10 +15,12 @@ public class Scheduler {
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendSocket, receiveSocket;
 	Date currentDate;
-	int elevatorState1, elevatorState2, elevatorState3, //will have to turn these into thread safe
+	Elevator Uno, Dos, Tres;
+	int elevatorState1, elevatorState2, elevatorState3, //will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
 		elevatorFloor1, elevatorFloor2, elevatorFloor3; //collections, ArrayList? 
-	Collection<Integer> c = Collections.synchronizedCollection(new ArrayList<Integer>(6)); //this will eventually be used to synch states (0-2) and current floors (3-5)	
-	static int ELEVATOR1PORT = 69, PACKETSIZE = 25, CLIENTPORT = 222, SELFPORT = 219, FLOORPORT = 238;
+	//<Integer> c = Collections.synchronizedCollection(new ArrayList<Integer>(6)); //this will eventually be used to synch states (0-2) and current floors (3-5)	
+	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, 
+			PACKETSIZE = 25, CLIENTPORT = 222, SELFPORT = 219, FLOORPORT = 238;
 
 	public Scheduler()
 	{
@@ -42,10 +44,30 @@ public class Scheduler {
 		} 
 	}
 
-	private int getBestElevator() {
+	private int getBestElevator(int toFloor) {
 		//from current data which elevator is best to send
-		//return its number
-		return -1;
+		//check to see if any elevator status is marked as idle. Easy Out;
+		if(elevatorState1 == 0) return 1;
+		else if(elevatorState2 == 0) return 2;
+		else if(elevatorState3 == 0) return 3;
+		
+		//No Elevator idle Check other specs to find best a case
+		
+		if(elevatorState1 == 1 && toFloor >= elevatorFloor1)
+			return 1;
+		if(elevatorState2 == 1 && toFloor >= elevatorFloor2)
+			return 2;
+		if(elevatorState3 == 1 && toFloor >= elevatorFloor3)
+			return 3;
+		if(elevatorState1 == 2 && toFloor <= elevatorFloor1)
+			return 1;
+		if(elevatorState2 == 2 && toFloor <= elevatorFloor2)
+			return 2;
+		if(elevatorState3 == 2 && toFloor <= elevatorFloor3)
+			return 3;
+		
+		//Implementation should prevent any situation where all of these fail; however recall function		
+		return getBestElevator(toFloor);
 	}
 
 	private void sendElevator(int elev, int floor, byte msg[]) {
@@ -54,8 +76,12 @@ public class Scheduler {
 		int toPort;
 		//assign proper port
 		switch(elev) {
+		case(3):
+			toPort = ELEVATORPORT3;
+		case(2):
+			toPort = ELEVATORPORT2;
 		default:
-			toPort = ELEVATOR1PORT;
+			toPort = ELEVATORPORT1;
 		}
 		sendPacket = new DatagramPacket(msg, msg.length,
 				receivePacket.getAddress(), toPort);
@@ -78,7 +104,7 @@ public class Scheduler {
 		int toFloor = 0;
 		byte data[] = new byte[PACKETSIZE];
 		receivePacket = new DatagramPacket(data, data.length);
-		System.out.println("Scheduler: Waiting for Packet from User.\n");
+		System.out.println("Scheduler: Waiting for Packet.\n");
 
 		// Block until a datagram packet is received from receiveSocket.
 		try {        
@@ -101,40 +127,10 @@ public class Scheduler {
 		int len = receivePacket.getLength();
 		System.out.println("Length: " + len);
 		System.out.print("Containing: " );
-		System.out.println(new String(this.receivePacket.getData()));
+		System.out.println(this.receivePacket.getData());
 
 		//decode request and assign toFloor as the floor that will be sent to elevator
-
-		if(fromPort == FLOORPORT) { //1 is arbitrary (from client/Button)
-			System.out.println("recieved from floor");
-			byte msg[] = new byte[PACKETSIZE];
-			msg[0] = data[0]; //direction
-			int floorRequest0 = data[1];
-			int floorRequest1 = data[2];
-			if(floorRequest0 == 0) {
-				toFloor = floorRequest1;
-			}
-			else {
-				toFloor = floorRequest1 + 10;
-			}
-			msg[1] = data[1];
-			msg[2] = data[2];
-			
-			int toElevator = getBestElevator();
-			sendElevator(toElevator, toFloor, msg);
-			System.out.println( "Server: Sending packet:");
-			System.out.println("To host: " + sendPacket.getAddress());
-			System.out.println("Destination host port: " + sendPacket.getPort());
-			len = sendPacket.getLength();
-			System.out.println("Length: " + len);
-			System.out.print("Containing: ");
-			System.out.println(new String(sendPacket.getData(),0,len));
-			System.out.println(this.receivePacket.getData() + "\n");
-			// or (as we should be sending back the same thing)
-			// System.out.println(received);
-		}
-		//decode data packet from elevator and update status bars for elevators
-		else { //received from elevator
+		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3) { //received from elevator
 			System.out.println("Received from elevator");
 			int elevatorNumber = data[0];
 			int floorDecode = data[2];
@@ -162,6 +158,36 @@ public class Scheduler {
 
 
 		}
+		else { //1 is arbitrary (from client/Button)
+			System.out.println("recieved from floor");
+			byte msg[] = new byte[PACKETSIZE];
+			msg[0] = data[0]; //direction
+			int floorRequest0 = data[1];
+			int floorRequest1 = data[2];
+			if(floorRequest0 == 0) {
+				toFloor = floorRequest1;
+			}
+			else {
+				toFloor = floorRequest1 + 10;
+			}
+			msg[1] = data[1];
+			msg[2] = data[2];
+			
+			int toElevator = getBestElevator(toFloor);
+			sendElevator(toElevator, toFloor, msg);
+			System.out.println( "Server: Sending packet:");
+			System.out.println("To host: " + sendPacket.getAddress());
+			System.out.println("Destination host port: " + sendPacket.getPort());
+			len = sendPacket.getLength();
+			System.out.println("Length: " + len);
+			System.out.print("Containing: ");
+			System.out.println(new String(sendPacket.getData(),0,len));
+			System.out.println(this.receivePacket.getData() + "\n");
+			// or (as we should be sending back the same thing)
+			// System.out.println(received);
+		}
+		//decode data packet from elevator and update status bars for elevators
+		
 
 		// Slow things down (wait 2 seconds)
 		try {
@@ -184,11 +210,14 @@ public class Scheduler {
 
 
 
-		// We're finished, so close the sockets.
-		sendSocket.close();
-		receiveSocket.close();
+		
 	}
 
+	void shutdownSystem() {
+		receiveSocket.close();
+		sendSocket.close();
+		System.exit(1);
+	}
 	void updateDate() {
 		currentDate = new Date();
 	}
