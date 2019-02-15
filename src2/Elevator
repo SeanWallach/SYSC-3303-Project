@@ -29,9 +29,9 @@ public class Elevator {
 /*		for(int i =0;i<numElev;i++) {
 			
 		} */
-		elev1 = new Elev(1,9,69);
-		elev2 = new Elev(1,9,70);
-		elev3 = new Elev(1,9,71);
+		elev1 = new Elev(1,10,69);
+		elev2 = new Elev(1,10,70);
+		elev3 = new Elev(1,10,71);
 		
 		try {
 			receive = new DatagramSocket(68);
