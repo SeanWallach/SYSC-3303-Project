@@ -73,7 +73,7 @@ public class Scheduler {
 	private void sendElevator(int elev, int floor, byte msg[]) {
 		//from the best elevator create the correct packet and send 
 		//correct data
-		int toPort;
+/*		int toPort;
 		//assign proper port
 		switch(elev) {
 		case(3):
@@ -83,8 +83,8 @@ public class Scheduler {
 		default:
 			toPort = ELEVATORPORT1;
 		}
-		sendPacket = new DatagramPacket(msg, msg.length,
-				receivePacket.getAddress(), toPort);
+*/		sendPacket = new DatagramPacket(msg, msg.length,
+				receivePacket.getAddress(), 68);
 		// Send the datagram packet to the client via the send socket. 
 		try {
 			sendSocket.send(sendPacket);
@@ -161,7 +161,8 @@ public class Scheduler {
 		else { //1 is arbitrary (from client/Button)
 			System.out.println("recieved from floor");
 			byte msg[] = new byte[PACKETSIZE];
-			msg[0] = data[0]; //direction
+			
+			msg[1] = data[0]; //direction
 			int floorRequest0 = data[1];
 			int floorRequest1 = data[2];
 			if(floorRequest0 == 0) {
@@ -170,10 +171,11 @@ public class Scheduler {
 			else {
 				toFloor = floorRequest1 + 10;
 			}
-			msg[1] = data[1];
-			msg[2] = data[2];
+			msg[2] = data[1];
+			msg[3] = data[2];
 			
 			int toElevator = getBestElevator(toFloor);
+			msg[0] = (byte)toElevator;
 			sendElevator(toElevator, toFloor, msg);
 			System.out.println( "Server: Sending packet:");
 			System.out.println("To host: " + sendPacket.getAddress());
