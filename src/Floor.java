@@ -30,10 +30,10 @@ public class Floor {
 	int directionLamp;          // 2 is for off, 1 is for going up, 0 is going down
 	
 	// Constructor with custom floor level
-	public Floor(int currFloor) {
+	public Floor(int currFloor, int port) {
 	   try {
 	      // Construct a datagram socket and bind it to any available port on the local host machine
-	      sendReceiveSocket = new DatagramSocket(SELFPORT);
+	      sendReceiveSocket = new DatagramSocket(port);
 	      if (currFloor > numOfFloors) {
 	    	  System.out.println("This floor is too high");
 	    	  System.exit(1);
@@ -129,7 +129,7 @@ public class Floor {
 	{
 	   Floor Floors[] = new Floor[numOfFloors]; 
 	   for (int i = 1; i <= numOfFloors; i++) {
-		  Floors[i-1] = new Floor(i);
+		  Floors[i-1] = new Floor(i, SELFPORT + i);
 	   }
 		  
 	// Reads input files for elevator calls
