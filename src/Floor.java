@@ -116,17 +116,16 @@ public class Floor {
 		 System.out.println("\nElevator request sent.\n");
 		 
 		 
-		 /*try {
-			Thread.sleep(1000);
+		 try {
+			Thread.sleep(3000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			System.out.println("cant Sleep");
-		}*/
+		}
 		 
 		 /* Now receiving
 		 byte data[] = new byte[3];
 		 receivePacket = new DatagramPacket(data, data.length);
-
 		 try {
 		    // Block until a datagram is received via sendReceiveSocket.  
 		    sendReceiveSocket.receive(receivePacket);
@@ -134,9 +133,7 @@ public class Floor {
 		    e.printStackTrace();
 		    System.exit(1);
 		 }
-
 		 System.out.print("Received content containing: ");
-
 		 // Form a String from the byte array.
 		 String received = new String(data,0,receivePacket.getLength());   
 		 System.out.println(received);
