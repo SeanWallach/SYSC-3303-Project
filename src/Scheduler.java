@@ -174,6 +174,9 @@ public class Scheduler {
 			msg[2] = data[1];
 			msg[3] = data[2];
 			
+			msg[4] = data[3];
+			msg[5] = data[4];
+			
 			int toElevator = getBestElevator(toFloor);
 			msg[0] = (byte)toElevator;
 			sendElevator(toElevator, toFloor, msg);

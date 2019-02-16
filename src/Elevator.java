@@ -45,7 +45,7 @@ public class Elevator {
 	
 	public void receiver() {
 		DatagramPacket receivePacket;
-		byte[] message = new byte[4];
+		byte[] message = new byte[25];
 		receivePacket = new DatagramPacket(message, message.length);
 		try {        
 	         System.out.println("Waiting..."); // so we know we're waiting
@@ -61,28 +61,39 @@ public class Elevator {
 		System.out.println("Host port: " + receivePacket.getPort());
 		int len = receivePacket.getLength();
 		System.out.println("Length: " + len);
-		System.out.print("Request for floor: " );
+		System.out.print("Request for (Initial, destination): " );
 		
 		
 		
 		//decode packet and get data and run proper elev
 		byte[] temp = receivePacket.getData();
-		int floor;
+		int initial, destination;
 		if(temp[2] >= 10) {
-			floor = temp[3] +10;
+			initial = temp[3] +10;
 		}
-		else {floor = temp[3];}
+		else {initial = temp[3];}
 		
-		System.out.println(floor);
+		if(temp[4] >= 10) {
+			destination = temp[5] +10;
+		}
+		else {destination = temp[5];}
+		
+		System.out.println("("+ initial+ ", " + destination+ ")");
 		
 		if(temp[0] == 1) {
-			elev1.addRequest(floor);
+			System.out.println("------Adding to Elevator 1-------");
+			elev1.addRequest(initial);
+			elev1.addRequest(destination);
 		}
 		else if(temp[0] == 2) {
-			elev2.addRequest(floor);
+			System.out.println("------Adding to Elevator 2-------");
+			elev2.addRequest(initial);
+			elev2.addRequest(destination);
 		}
 		else if(temp[0] == 3) {
-			elev3.addRequest(floor);
+			System.out.println("------Adding to Elevator 3-------");
+			elev3.addRequest(initial);
+			elev3.addRequest(destination);
 		}
 		
 	}

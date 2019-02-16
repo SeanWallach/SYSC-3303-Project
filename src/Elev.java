@@ -79,11 +79,13 @@ public void service() { //moves the elevator through queue to service requests
 				System.out.println("going up, current floor: " + currentFloor);
 				this.currentFloor++;
 				motor = 1;
+				this.sendRequest(this.currentFloor, this.motor);
 			}
 			else {
-				System.out.println("going down");
+				System.out.println("going down" + currentFloor);
 				this.currentFloor--;
 				motor = 2;
+				this.sendRequest(this.currentFloor, this.motor);
 			}
 		}
 		this.motor = 0;
@@ -126,7 +128,7 @@ public void sendRequest(int currFloor,int direction) { //send new internal reque
 		data[3] = (byte) currFloor;
 	}
 	
-	System.out.print("Sending packet containing: "+ data.toString());	
+	System.out.println("Sending packet containing: "+ data.toString());	
 	try {
 		DatagramPacket sendPacket = new DatagramPacket(data, data.length,InetAddress.getLocalHost(), SEND_PORT_NUMBER);
 		sendSocket.send(sendPacket);
