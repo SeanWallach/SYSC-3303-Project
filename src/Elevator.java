@@ -113,7 +113,6 @@ public class Elevator {
 	public static void main(String[] args)  {
 		//create new elevator then wait to receive as receiver, then run proper elevator set by skeddy
 		Elevator elevator = new Elevator(3);
-		
 		while(true) {
 			elevator.run();
 		}
