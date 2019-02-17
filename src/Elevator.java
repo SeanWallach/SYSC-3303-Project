@@ -12,9 +12,8 @@ public class Elevator {
 	private static Elev elev2;
 	private static Elev elev3;
 	
-	boolean elev1Start=false, elev2Start=false, elev3Start=false;
 
-	public Elevator(int numElev) {
+	public Elevator() {
 		// create nmuber of elev starting at prot 69
 		/*
 		 * for(int i =0;i<numElev;i++) {
@@ -36,7 +35,7 @@ public class Elevator {
 		byte[] message = new byte[25];
 		receivePacket = new DatagramPacket(message, message.length);
 		try {
-			System.out.println("Waiting..."); // so we know we're waiting
+			System.out.println("Waiting...\n"); // so we know we're waiting
 			receive.receive(receivePacket);
 		} catch (IOException e) {
 			System.out.print("IO Exception: likely:");
@@ -45,11 +44,11 @@ public class Elevator {
 			System.exit(1);
 		}
 		System.out.println("Elevator: Packet received:");
-		System.out.println("From host: " + receivePacket.getAddress());
+		/*System.out.println("From host: " + receivePacket.getAddress());
 		System.out.println("Host port: " + receivePacket.getPort());
 		int len = receivePacket.getLength();
 		System.out.println("Length: " + len);
-		System.out.print("Request for (Initial, destination): ");
+		*/System.out.print("Request for (Initial, destination): ");
 
 		// decode packet and get data and run proper elev
 		byte[] temp = receivePacket.getData();
@@ -91,7 +90,7 @@ public class Elevator {
 	public static void main(String[] args) {
 		// create new elevator then wait to receive as receiver, then run proper
 		// elevator set by skeddy
-		Elevator elevator = new Elevator(3);
+		Elevator elevator = new Elevator();
 		elev1 = new Elev(1, 10, 69, elevator);
 		elev2 = new Elev(2, 10, 70, elevator);
 		elev3 = new Elev(3, 10, 71, elevator);

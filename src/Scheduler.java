@@ -18,9 +18,8 @@ public class Scheduler {
 	Elevator Uno, Dos, Tres;
 	int elevatorState1, elevatorState2, elevatorState3, //will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
 		elevatorFloor1, elevatorFloor2, elevatorFloor3; //collections, ArrayList? 
-	//<Integer> c = Collections.synchronizedCollection(new ArrayList<Integer>(6)); //this will eventually be used to synch states (0-2) and current floors (3-5)	
 	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, 
-			PACKETSIZE = 25, CLIENTPORT = 222, SELFPORT = 219, FLOORPORT = 238;
+			PACKETSIZE = 25, SELFPORT = 219, FLOORPORT = 238;
 
 	public Scheduler()
 	{
@@ -217,9 +216,6 @@ public class Scheduler {
 		//Identify and get best elevators port for send pack		
 	}
 	
-	public void run(){
-		this.receiveAndSend();
-	}
 
 
 	void shutdownSystem() {
@@ -235,7 +231,7 @@ public class Scheduler {
 	{
 		Scheduler a = new Scheduler();
 		while(true) {
-			a.run();
+			a.receiveAndSend();
 		}
 	}
 }

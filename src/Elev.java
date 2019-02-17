@@ -12,7 +12,7 @@ public class Elev extends Thread{
 	private int topFloor;
 	private boolean door; // false=closed true=open
 	private int[] buttons;
-	private int currentFloor; // 2 is lobby
+	private int currentFloor; // 1 is default
 	private ArrayList<Integer> serviceQueue; // floors that will be serviced in organized order
 	public boolean requestWaiting;
 
@@ -21,7 +21,6 @@ public class Elev extends Thread{
 	private int myPort;
 	private Elevator contorller;
 
-	private boolean passenger;
 
 	public Elev(int elevNum, int floors, int port, Elevator thisController) {
 		this.contorller = thisController;
@@ -37,7 +36,6 @@ public class Elev extends Thread{
 		currentFloor = 1;
 		serviceQueue = new ArrayList<Integer>();
 		myPort = port;
-		passenger = false;
 		try {
 			sendSocket = new DatagramSocket(myPort);
 		} catch (SocketException e) {
@@ -77,7 +75,7 @@ public class Elev extends Thread{
 				{
 					wait();
 				}
-				System.out.println("^^^^^^^Elevator " + this.elevatorNumber + "^^^^^^");
+				//System.out.println("^^^^^^^Elevator " + this.elevatorNumber + "^^^^^^");
 				if (this.currentFloor == this.serviceQueue.get(0)) {
 					this.serviceQueue.remove(0);
 					if(this.serviceQueue.isEmpty()) this.motor=0;
@@ -85,13 +83,13 @@ public class Elev extends Thread{
 					System.out.println("\n****Elevator" +this.elevatorNumber + " at Des: "+ this.currentFloor+"****\n");
 					// this.displayButtons();
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
-					System.out.println("going up, current floor: " + currentFloor+ "\n");
+					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
 					this.currentFloor++;
 					this.motor = 1;
 					this.sendRequest(this.currentFloor, this.motor);
 					Thread.sleep(1000);
 				} else if(this.serviceQueue.get(0) < this.currentFloor){
-					System.out.println("going down, current floor: " + currentFloor+"\n");
+					System.out.println("E"+ this.elevatorNumber+" going down, current floor: " + currentFloor+"\n");
 					this.currentFloor--;
 					this.motor = 2;
 					this.sendRequest(this.currentFloor, this.motor);
@@ -128,7 +126,7 @@ public class Elev extends Thread{
 			data[3] = (byte) currFloor;
 		}
 
-		System.out.println("Sending packet containing: " + data.toString());
+		//System.out.println("Sending packet containing: " + data.toString());
 		try {
 			DatagramPacket sendPacket = new DatagramPacket(data, data.length, InetAddress.getLocalHost(),
 					SEND_PORT_NUMBER);
@@ -142,7 +140,7 @@ public class Elev extends Thread{
 			e.printStackTrace();
 		}
 
-		System.out.println("Packet sent to Scheduler");
+		//System.out.println("Packet sent to Scheduler");
 	}
 	
 	public void run() {
