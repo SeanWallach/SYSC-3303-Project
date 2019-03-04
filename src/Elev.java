@@ -11,6 +11,8 @@ public class Elev extends Thread{
 	private int motor; // 0==stop 1==up 2==down
 	private int topFloor;
 	private boolean door; // false=closed true=open
+	public boolean jam; //door jam sensor output
+	public boolean functioning;	//service state 
 	private int[] buttons;
 	private int currentFloor; // 1 is default
 	private ArrayList<Integer> serviceQueue; // floors that will be serviced in organized order
@@ -71,17 +73,20 @@ public class Elev extends Thread{
 	public void service()throws InterruptedException { // moves the elevator through queue to service requests
 		while(true) {
 			synchronized(this) {
-				while(requestWaiting || this.serviceQueue.isEmpty())
+				while(requestWaiting || this.serviceQueue.isEmpty() )
 				{
 					wait();
 				}
+				while( door == true || functioning == true) {
 				//System.out.println("^^^^^^^Elevator " + this.elevatorNumber + "^^^^^^");
 				if (this.currentFloor == this.serviceQueue.get(0)) {
 					this.serviceQueue.remove(0);
 					if(this.serviceQueue.isEmpty()) this.motor=0;
 					this.sendRequest(this.currentFloor, this.motor);
 					System.out.println("\n****Elevator" +this.elevatorNumber + " at Des: "+ this.currentFloor+"****\n");
+					this.open_Close();
 					// this.displayButtons();
+					this.open_Close();
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
 					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
 					this.currentFloor++;
@@ -96,8 +101,38 @@ public class Elev extends Thread{
 					Thread.sleep(1000);
 				}
 			}
+			}
 		}
 
+	}
+	
+	
+	
+	public void open_Close() {
+		if(door == true) {   //if door open
+			while(jam) {
+				System.out.println("Door jamed");
+				try {
+					Thread.sleep(2);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}                         //wait to try closing door again
+			}
+			door = false; //close door
+		}
+		else {  //if door closed
+			while(jam) {
+				System.out.println("Door jamed");
+				try {
+					Thread.sleep(2);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}                         //wait to try closing door again
+			}
+			door = true; //open door
+		}
 	}
 
 	/*
