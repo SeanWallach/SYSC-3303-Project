@@ -1,5 +1,3 @@
-
-
 //This class is the floor for the project
 //Last edited January 21st, 2016
 
@@ -55,7 +53,7 @@ public class Floor {
 
 		 String[] splitted = line.split("\\s+");
 
-		 byte msg[] = new byte[3];	// Bit 0 - Direction 	Bit 1,2 - current Floor
+		 byte msg[] = new byte[5];	// Bit 0 - Direction 	Bit 1,2 - initial Floor   Bit 3,4 - des Floor
 
 		 // Direction
 		 if (splitted[2].equals("up")) {
@@ -83,6 +81,19 @@ public class Floor {
 		     msg[2] = n;
 		 }
 
+		 
+		 if(splitted[3].length()>1) {//destination floor is double digits
+		     byte d1 = (byte) (Integer.parseInt(splitted[3])/10);	// get first digit of string
+		     byte d2 = (byte) (Integer.parseInt(splitted[3])%10);	// get last digit of string
+		     msg[3] = d1;
+		     msg[4] = d2; 
+		 }
+		 else {
+			 byte d = (byte) (Integer.parseInt(splitted[3]));
+			 msg[3] = 0;
+			 msg[4] = d;
+		 }
+
 		 try {
 		    sendPacket = new DatagramPacket(msg, msg.length,
 				    InetAddress.getLocalHost(), SCHEDULER_PORT);
@@ -103,11 +114,18 @@ public class Floor {
 		    System.out.print(msg[i]);
 		 }
 		 System.out.println("\nElevator request sent.\n");
-
-		 // Now receiving
+		 
+		 
+		 try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			System.out.println("cant Sleep");
+		}
+		 
+		 /* Now receiving
 		 byte data[] = new byte[3];
 		 receivePacket = new DatagramPacket(data, data.length);
-
 		 try {
 		    // Block until a datagram is received via sendReceiveSocket.  
 		    sendReceiveSocket.receive(receivePacket);
@@ -115,13 +133,11 @@ public class Floor {
 		    e.printStackTrace();
 		    System.exit(1);
 		 }
-
 		 System.out.print("Received content containing: ");
-
 		 // Form a String from the byte array.
 		 String received = new String(data,0,receivePacket.getLength());   
 		 System.out.println(received);
-
+		*/
 	}
 	
 

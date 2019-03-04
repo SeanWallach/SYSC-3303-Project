@@ -18,9 +18,8 @@ public class Scheduler {
 	Elevator Uno, Dos, Tres;
 	int elevatorState1, elevatorState2, elevatorState3, //will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
 		elevatorFloor1, elevatorFloor2, elevatorFloor3; //collections, ArrayList? 
-	//<Integer> c = Collections.synchronizedCollection(new ArrayList<Integer>(6)); //this will eventually be used to synch states (0-2) and current floors (3-5)	
 	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, 
-			PACKETSIZE = 25, CLIENTPORT = 222, SELFPORT = 219, FLOORPORT = 238;
+			PACKETSIZE = 25, SELFPORT = 219, FLOORPORT = 238;
 
 	public Scheduler()
 	{
@@ -44,30 +43,30 @@ public class Scheduler {
 		} 
 	}
 
-	private int getBestElevator(int toFloor) {
+	private int getBestElevator(int toFloor, int direction) {
 		//from current data which elevator is best to send
 		//check to see if any elevator status is marked as idle. Easy Out;
 		if(elevatorState1 == 0) return 1;
-		else if(elevatorState2 == 0) return 2;
-		else if(elevatorState3 == 0) return 3;
+		if(elevatorState2 == 0) return 2;
+		if(elevatorState3 == 0) return 3;
 		
 		//No Elevator idle Check other specs to find best a case
 		
-		if(elevatorState1 == 1 && toFloor >= elevatorFloor1)
+		if((elevatorState1 == 1 && direction == 1) && toFloor >= elevatorFloor1)
 			return 1;
-		if(elevatorState2 == 1 && toFloor >= elevatorFloor2)
+		if((elevatorState2 == 1 && direction == 1) && toFloor >= elevatorFloor2)
 			return 2;
-		if(elevatorState3 == 1 && toFloor >= elevatorFloor3)
+		if((elevatorState3 == 1 && direction == 1) && toFloor >= elevatorFloor3)
 			return 3;
-		if(elevatorState1 == 2 && toFloor <= elevatorFloor1)
+		if((elevatorState1 == 2 && direction == 2) && toFloor <= elevatorFloor1)
 			return 1;
-		if(elevatorState2 == 2 && toFloor <= elevatorFloor2)
+		if((elevatorState2 == 2 && direction == 2) && toFloor <= elevatorFloor2)
 			return 2;
-		if(elevatorState3 == 2 && toFloor <= elevatorFloor3)
+		if((elevatorState3 == 2 && direction == 2) && toFloor <= elevatorFloor3)
 			return 3;
 		
 		//Implementation should prevent any situation where all of these fail; however recall function		
-		return getBestElevator(toFloor);
+		return getBestElevator(toFloor, direction);
 	}
 
 	private void sendElevator(int elev, int floor, byte msg[]) {
@@ -78,13 +77,17 @@ public class Scheduler {
 		switch(elev) {
 		case(3):
 			toPort = ELEVATORPORT3;
+			elevatorState3=msg[1];
 		case(2):
 			toPort = ELEVATORPORT2;
+			elevatorState2=msg[1];
 		default:
 			toPort = ELEVATORPORT1;
+			elevatorState1=msg[1];
 		}
+		
 		sendPacket = new DatagramPacket(msg, msg.length,
-				receivePacket.getAddress(), toPort);
+				receivePacket.getAddress(), 68);
 		// Send the datagram packet to the client via the send socket. 
 		try {
 			sendSocket.send(sendPacket);
@@ -142,17 +145,21 @@ public class Scheduler {
 				currFloor = data[3] + 10;
 			}
 			//update the correct elevator
-			switch(elevatorNumber) {
-			default:
+			if(elevatorNumber==1) {
 				//direction: 0 = stop; 1 = up; 2 = down
 				elevatorState1 = data[1];
 				elevatorFloor1 = currFloor;
-			case 2: 
+				System.out.println("\n Updating E1: "+ elevatorState1+ ", "+elevatorFloor1+ "\n");
+			}
+			else if(elevatorNumber==2) {
 				elevatorState2 = data[1];
 				elevatorFloor2 = currFloor;
-			case 3:
+				System.out.println("\n Updating E2: "+ elevatorState2+ ", "+elevatorFloor2+ "\n");
+			}
+			else {
 				elevatorState3 = data[1];
 				elevatorFloor3 = currFloor;
+				System.out.println("\n Updating E3: "+ elevatorState3+ ", "+elevatorFloor3+ "\n");
 			}
 
 
@@ -161,7 +168,9 @@ public class Scheduler {
 		else { //1 is arbitrary (from client/Button)
 			System.out.println("recieved from floor");
 			byte msg[] = new byte[PACKETSIZE];
-			msg[0] = data[0]; //direction
+			int direction = data[0];
+			
+			msg[1] = (byte)direction; //direction
 			int floorRequest0 = data[1];
 			int floorRequest1 = data[2];
 			if(floorRequest0 == 0) {
@@ -170,10 +179,14 @@ public class Scheduler {
 			else {
 				toFloor = floorRequest1 + 10;
 			}
-			msg[1] = data[1];
-			msg[2] = data[2];
+			msg[2] = data[1];
+			msg[3] = data[2];
 			
-			int toElevator = getBestElevator(toFloor);
+			msg[4] = data[3];
+			msg[5] = data[4];
+			
+			int toElevator = getBestElevator(toFloor, direction);
+			msg[0] = (byte)toElevator;
 			sendElevator(toElevator, toFloor, msg);
 			System.out.println( "Server: Sending packet:");
 			System.out.println("To host: " + sendPacket.getAddress());
@@ -189,29 +202,21 @@ public class Scheduler {
 		//decode data packet from elevator and update status bars for elevators
 		
 
-		// Slow things down (wait 2 seconds)
+		/* Slow things down (wait 2 seconds)
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e ) {
 			e.printStackTrace();
 			System.exit(1);
-		}
+		}*/
 
 
 
 
-		//Identify and get best elevators port for send packet
-
-
-
-
-
-
-
-
-
-		
+		//Identify and get best elevators port for send pack		
 	}
+	
+
 
 	void shutdownSystem() {
 		receiveSocket.close();
