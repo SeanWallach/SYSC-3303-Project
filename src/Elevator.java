@@ -97,8 +97,8 @@ public class Elevator {
 		elev1.start();
 		elev2.start();
 		elev3.start();
-		Break destruction = new Break(elev1,elev2,elev3);
-		destruction.start();
+		Break destruction = new Break(elev1,elev2,elev3);			////////////////////////////////////////////////////////////////////
+		destruction.start();										////////////////////////////////////////////////////////////////////
 		while (true) {
 			elevator.run();
 		}
