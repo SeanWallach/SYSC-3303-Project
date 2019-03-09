@@ -20,13 +20,10 @@ public class Scheduler {
 														// up 2 is down
 			elevatorFloor1, elevatorFloor2, elevatorFloor3; // collections, ArrayList?
 	boolean e1Function, e2Function, e3Function;
-	//boolean[] etimers = new boolean[3];
-	//boolean[] eSafety = new boolean[3];
+
 	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, PACKETSIZE = 25, SELFPORT = 219,
 			FLOORPORT = 238;
-	//private Timer e1Timer, e2Timer, e3Timer;
 	public FaultTimer E1Timer, E2Timer, E3Timer;
-	//static long FAILTIME = 10000;// 10 seconds for fail time
 
 	public Scheduler() {
 		elevatorState1 = 0;
@@ -98,6 +95,7 @@ public class Scheduler {
 		// assign proper port
 		switch (elev) {
 		// set Elevator in msg and start timer for elevator to respond
+		//timer starts or updates
 		case (3):
 			toPort = ELEVATORPORT3;
 			elevatorState3 = msg[1];
@@ -105,10 +103,7 @@ public class Scheduler {
 		case (2):
 			toPort = ELEVATORPORT2;
 			elevatorState2 = msg[1];
-
 			E2Timer.time();
-			//eSafety[1] = false;
-			// System.out.println("\n\n ^^^^^^ AT SEND E2 START TIMER^^^^^\n\n");
 
 		default:
 			toPort = ELEVATORPORT1;

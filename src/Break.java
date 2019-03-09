@@ -15,47 +15,24 @@ public class Break extends Thread {
 	}
 
 	public void jam(int elevNum) {
-		System.out.println("\n\n\n\n *****JAM TIME****** \n\n\n");
+
 		if (elevNum == 1) {
 			this.elev1.jam = true;
-			try {
-				Thread.sleep(6000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("\n\n\n UNJAMED  \n\n\n");
-			this.elev1.jam = false;
 		}
 
 		else if (elevNum == 2) {
 			this.elev2.jam = true;
-			try {
-				Thread.sleep(6000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("\n\n\n UNJAMED  \n\n\n");
-			this.elev2.jam = false;
 		}
 
 		else {
 			this.elev3.jam = true;
-			try {
-				Thread.sleep(10000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			System.out.println("\n\n\n UNJAMED  \n\n\n");
-			this.elev2.jam = false;
 		}
 
 	}
 
 	public void stopElev(int elevNum) {
-
+		
+		//Set the functioning to false preventing service from running
 		if (elevNum == 1) {
 			this.elev1.functioning = false;
 			System.out.println("\n\n **** E1 failure ***\n\n");
@@ -81,7 +58,9 @@ public class Break extends Thread {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
+		
+		//randomly select which elevator to jam and shutdown and when
 		Random ran = new Random();
 		for (int i = 0; i < 2; i++) {
 			int chosen = ran.nextInt(3) + 1; // 1-3

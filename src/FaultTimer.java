@@ -1,8 +1,12 @@
+//@Author Andrew Dybka, Maveric
+//Create timers to make sure elevators are runn
+
 
 
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
 
 public class FaultTimer {
 	private Scheduler thisSched;
@@ -16,7 +20,7 @@ public class FaultTimer {
 		running = false;
 	}
 
-	private void startTimer() {
+	private void startTimer() {//create a new timer
 		TimerTask timerTask = new TimerTask() {
 			@Override
 			public void run() {
@@ -34,13 +38,16 @@ public class FaultTimer {
 				}
 			}
 		};
+		//
+		//create a new timer and set running to true
+		
 		timer = new Timer();
 		timer.schedule(timerTask, 3000);
 		running = true;
 
 	}
 
-	private void update() {
+	private void update() {//update a started timer
 		TimerTask timerTask = new TimerTask() {
 			@Override
 			public void run() {
@@ -58,6 +65,8 @@ public class FaultTimer {
 				}
 			}
 		};
+		//clear old timer and create new with task
+		
 		timer.cancel();
 		timer = new Timer();
 		timer.schedule(timerTask, 3000);
@@ -72,9 +81,9 @@ public class FaultTimer {
 	}
 
 	public void time() {
-		if (running) {
+		if (running) {//if already runnign update timer
 			update();
-		} else {
+		} else {//if not timeing start a new timer
 			startTimer();
 		}
 	}
