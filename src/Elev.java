@@ -139,6 +139,8 @@ public class Elev extends Thread{
 	
 	public void open_Close() {                                            ////////////////////////////////////////////////////////////////////
 		if(door == true) {   //if door open
+			if(jam == ture){
+				this.sendRequest(currentFloor, 4);
 			while(jam == true) {
 				System.out.println("Door jamed");
 				try {
@@ -147,10 +149,14 @@ public class Elev extends Thread{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}                         //wait to try closing door again
+				}
+				this.sendRequest(currentFloor, 4);
 			}
 			door = false; //close door
 		}
 		else {  //if door closed
+			if(jam == ture){
+				this.sendRequest(currentFloor, 4);
 			while(jam == true) {
 				
 				try {
@@ -159,6 +165,8 @@ public class Elev extends Thread{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}                         //wait to try closing door again
+				}
+				this.sendRequest(currentFloor, 4);
 			}
 			door = true; //open door
 		}
