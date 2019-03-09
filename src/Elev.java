@@ -34,16 +34,18 @@ public class Elev extends Thread{
 		for (int i = 1; i <= floors; i++) {
 			buttons[i - 1] = i;
 		}
+		
 		elevatorNumber = elevNum;
 		door = false;
 		topFloor = floors;
 		motor = 0;
 		currentFloor = 1;
 		serviceQueue = new ArrayList<Integer>();
-		elevLamp = new ArrayList<Integer>(); 	////////////////////////////////////////////////////////////////////
+		elevLamp = new ArrayList<Integer>(); 	
 		myPort = port;
-		jam = false; 						////////////////////////////////////////////////////////////////////
-		functioning = true; 				////////////////////////////////////////////////////////////////////
+		jam = false; 						
+		functioning = true; 
+		
 		try {
 			sendSocket = new DatagramSocket(myPort);
 		} catch (SocketException e) {
@@ -73,12 +75,12 @@ public class Elev extends Thread{
 			}
 			elevLamp = serviceQueue;  //the lamp displays all floors to be visited
 			
-			//display lamp 								////////////////////////////////////////////////////////////////////
-			String temp ="";							////////////////////////////////////////////////////////////////////
-			for(Integer i: elevLamp) {					////////////////////////////////////////////////////////////////////
-				temp +=" "+i;							////////////////////////////////////////////////////////////////////
-			}											////////////////////////////////////////////////////////////////////
-			System.out.println("Elevator " +this.elevatorNumber + " visiting:"+ temp + "\n"); //////////////////////////////////
+			//display lamp 								
+			String temp ="";							
+			for(Integer i: elevLamp) {					
+				temp +=" "+i;							
+			}											
+			//System.out.println("Elevator " +this.elevatorNumber + " visiting:"+ temp + "\n"); 
 			
 			
 			requestWaiting=false;
@@ -93,7 +95,7 @@ public class Elev extends Thread{
 				{
 					wait();
 				}
-				if( door == false || functioning == true) {
+				if(functioning && !door) {
 				//System.out.println("^^^^^^^Elevator " + this.elevatorNumber + "^^^^^^");
 				if (this.currentFloor == this.serviceQueue.get(0)) {
 					this.serviceQueue.remove(0);
@@ -102,16 +104,16 @@ public class Elev extends Thread{
 					this.sendRequest(this.currentFloor, this.motor);
 					System.out.println("\n****Elevator" +this.elevatorNumber + " at Des: "+ this.currentFloor+"****\n");
 					
-					//display lamp 								////////////////////////////////////////////////////////////////////
-					String temp ="";							////////////////////////////////////////////////////////////////////
-					for(Integer i: elevLamp) {					////////////////////////////////////////////////////////////////////
-						temp +=" "+i;							////////////////////////////////////////////////////////////////////
-					}											////////////////////////////////////////////////////////////////////
-					System.out.println("Elevator " +this.elevatorNumber + " visiting:"+ temp + "\n"); //////////////////////////////////
+					//display lamp 								
+					String temp ="";							
+					for(Integer i: elevLamp) {					
+						temp +=" "+i;							
+					}											
+					//System.out.println("Elevator " +this.elevatorNumber + " visiting:"+ temp + "\n"); 
 					
-					this.open_Close();   					//////////////////////////////////////////////////////////
-					// this.displayButtons();
-					this.open_Close();						///////////////////////////////////////////////////////////
+					this.open_Close();   					
+					Thread.sleep(3000);
+					this.open_Close();						
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
 					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
 					this.currentFloor++;
@@ -131,38 +133,47 @@ public class Elev extends Thread{
 
 	}
 	
-	public int getCurrentFLoor() {			////////////////////////////////////////////////////////////////////
+	public int getCurrentFLoor() {			
 		return this.currentFloor;
 	}
 	
 	
 	
-	public void open_Close() {                                            ////////////////////////////////////////////////////////////////////
+	public void open_Close() {                                           
 		if(door == true) {   //if door open
+			System.out.println("Elevator "+ this.elevatorNumber + " closing doors");
 			while(jam == true) {
-				System.out.println("Door jamed");
+				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....");
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}                         //wait to try closing door again
+				} 
+				System.out.println("Elevator "+ this.elevatorNumber + "Jam Fixed");
+				jam=false;
+				System.out.println("Elevator "+ this.elevatorNumber + "closing doors");
+						
 			}
 			door = false; //close door
 		}
 		else {  //if door closed
+			System.out.println("Elevator "+ this.elevatorNumber + " Opening doors");
 			while(jam == true) {
-				
+				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....");
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}                         //wait to try closing door again
+				} 
+				System.out.println("Elevator "+ this.elevatorNumber + "Jam Fixed");
+				jam=false;
+				System.out.println("Elevator "+ this.elevatorNumber + " Opening doors");						
 			}
-			door = true; //open door
+			door = false; //close door
 		}
-	}																	////////////////////////////////////////////////////////////////////
+	}		
 
 	/*
 	 * public void displayButtons() { //will display buttons for gui, but act as
