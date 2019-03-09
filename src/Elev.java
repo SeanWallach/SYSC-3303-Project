@@ -11,6 +11,7 @@ public class Elev extends Thread{
 	private int motor; // 0==stop 1==up 2==down
 	private int topFloor;
 	private boolean door; // false=closed true=open
+	
 	private int[] buttons;
 	private int currentFloor; // 1 is default
 	private ArrayList<Integer> serviceQueue; // floors that will be serviced in organized order
@@ -21,7 +22,11 @@ public class Elev extends Thread{
 	private int myPort;
 	private Elevator contorller;
 
-
+	//new this itteration
+	public boolean jam; //door jam sensor output
+	public boolean functioning;	//service state 
+	public ArrayList<Integer> elevLamp;
+	
 	public Elev(int elevNum, int floors, int port, Elevator thisController) {
 		this.contorller = thisController;
 		requestWaiting=false;
@@ -35,7 +40,10 @@ public class Elev extends Thread{
 		motor = 0;
 		currentFloor = 1;
 		serviceQueue = new ArrayList<Integer>();
+		elevLamp = new ArrayList<Integer>(); 	////////////////////////////////////////////////////////////////////
 		myPort = port;
+		jam = false; 						////////////////////////////////////////////////////////////////////
+		functioning = true; 				////////////////////////////////////////////////////////////////////
 		try {
 			sendSocket = new DatagramSocket(myPort);
 		} catch (SocketException e) {
@@ -63,6 +71,16 @@ public class Elev extends Thread{
 				for(Integer i: this.serviceQueue) System.out.print(i+" ");
 	
 			}
+			elevLamp = serviceQueue;  //the lamp displays all floors to be visited
+			
+			//display lamp 								////////////////////////////////////////////////////////////////////
+			String temp ="";							////////////////////////////////////////////////////////////////////
+			for(Integer i: elevLamp) {					////////////////////////////////////////////////////////////////////
+				temp +=" "+i;							////////////////////////////////////////////////////////////////////
+			}											////////////////////////////////////////////////////////////////////
+			System.out.println("Elevator " +this.elevatorNumber + " visiting:"+ temp + "\n"); //////////////////////////////////
+			
+			
 			requestWaiting=false;
 			notifyAll();
 		}
@@ -71,17 +89,29 @@ public class Elev extends Thread{
 	public void service()throws InterruptedException { // moves the elevator through queue to service requests
 		while(true) {
 			synchronized(this) {
-				while(requestWaiting || this.serviceQueue.isEmpty())
+				while(requestWaiting || this.serviceQueue.isEmpty() )
 				{
 					wait();
 				}
+				if( door == false || functioning == true) {
 				//System.out.println("^^^^^^^Elevator " + this.elevatorNumber + "^^^^^^");
 				if (this.currentFloor == this.serviceQueue.get(0)) {
 					this.serviceQueue.remove(0);
+					elevLamp = this.serviceQueue;
 					if(this.serviceQueue.isEmpty()) this.motor=0;
 					this.sendRequest(this.currentFloor, this.motor);
 					System.out.println("\n****Elevator" +this.elevatorNumber + " at Des: "+ this.currentFloor+"****\n");
+					
+					//display lamp 								////////////////////////////////////////////////////////////////////
+					String temp ="";							////////////////////////////////////////////////////////////////////
+					for(Integer i: elevLamp) {					////////////////////////////////////////////////////////////////////
+						temp +=" "+i;							////////////////////////////////////////////////////////////////////
+					}											////////////////////////////////////////////////////////////////////
+					System.out.println("Elevator " +this.elevatorNumber + " visiting:"+ temp + "\n"); //////////////////////////////////
+					
+					this.open_Close();   					//////////////////////////////////////////////////////////
 					// this.displayButtons();
+					this.open_Close();						///////////////////////////////////////////////////////////
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
 					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
 					this.currentFloor++;
@@ -96,9 +126,43 @@ public class Elev extends Thread{
 					Thread.sleep(1000);
 				}
 			}
+			}
 		}
 
 	}
+	
+	public int getCurrentFLoor() {			////////////////////////////////////////////////////////////////////
+		return this.currentFloor;
+	}
+	
+	
+	
+	public void open_Close() {                                            ////////////////////////////////////////////////////////////////////
+		if(door == true) {   //if door open
+			while(jam == true) {
+				System.out.println("Door jamed");
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}                         //wait to try closing door again
+			}
+			door = false; //close door
+		}
+		else {  //if door closed
+			while(jam == true) {
+				
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}                         //wait to try closing door again
+			}
+			door = true; //open door
+		}
+	}																	////////////////////////////////////////////////////////////////////
 
 	/*
 	 * public void displayButtons() { //will display buttons for gui, but act as
