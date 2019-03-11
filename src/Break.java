@@ -53,7 +53,7 @@ public class Break extends Thread {
 
 	public void chaos() {
 		try {
-			Thread.sleep(2000);
+			Thread.sleep(10000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -94,9 +94,9 @@ public class Break extends Thread {
 	}
 
 	public void run() {
-		while (go) {
+	//	while (go) {
 			this.chaos();
-		}
+	//	}
 	}
 
 }
