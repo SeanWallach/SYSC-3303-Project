@@ -1,4 +1,3 @@
-
 // Scheduler.java
 // Maveric Garde 101031617
 // This class is the Intermediate of a Client/Server UDP client on
@@ -14,7 +13,9 @@ public class Scheduler {
 
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendSocket, receiveSocket;
-	Date currentDate;
+	Thread t1, t2, t3; //threads for monitoring elevators
+	Date currentDate; 
+	Boolean isActive1 = true, isActive2 = true, isActive3 = true; //To keep track of which elevators are talking to the scheduler
 	Elevator Uno, Dos, Tres;
 	int elevatorState1, elevatorState2, elevatorState3, //will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
 		elevatorFloor1, elevatorFloor2, elevatorFloor3; //collections, ArrayList? 
@@ -24,6 +25,9 @@ public class Scheduler {
 	public Scheduler()
 	{
 		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; elevatorFloor2 = 0; elevatorFloor3 = 0; //all elevators should be idle at startup
+	    t1 = new Thread(new FaultScheduler(this, 1));
+		t2 = new Thread(new FaultScheduler(this, 2));
+		t3 = new Thread(new FaultScheduler(this, 3));
 		try {
 			// Construct a datagram socket and bind it to any available 
 			// port on the local host machine. This socket will be used to
@@ -34,35 +38,38 @@ public class Scheduler {
 			// on the local host machine. This socket will be used to
 			// receive UDP Datagram packets from the client
 			receiveSocket = new DatagramSocket(SELFPORT);
-
+			
 			// to test socket timeout (2 seconds)
 			//receiveSocket.setSoTimeout(2000);
 		} catch (SocketException se) {
 			se.printStackTrace();
 			System.exit(1);
 		} 
+		t1.start();
+		t2.start();
+		t3.start();
 	}
 
 	private int getBestElevator(int toFloor, int direction) {
 		//from current data which elevator is best to send
 		//check to see if any elevator status is marked as idle. Easy Out;
-		if(elevatorState1 == 0) return 1;
-		if(elevatorState2 == 0) return 2;
-		if(elevatorState3 == 0) return 3;
+		if(elevatorState1 == 0 && isActive1) return 1;
+		if(elevatorState2 == 0 && isActive2) return 2;
+		if(elevatorState3 == 0 && isActive3) return 3;
 		
 		//No Elevator idle Check other specs to find best a case
 		
-		if((elevatorState1 == 1 && direction == 1) && toFloor >= elevatorFloor1)
+		if((elevatorState1 == 1 && direction == 1 && isActive1) && toFloor >= elevatorFloor1)
 			return 1;
-		if((elevatorState2 == 1 && direction == 1) && toFloor >= elevatorFloor2)
+		if((elevatorState2 == 1 && direction == 1&& isActive2) && toFloor >= elevatorFloor2)
 			return 2;
-		if((elevatorState3 == 1 && direction == 1) && toFloor >= elevatorFloor3)
+		if((elevatorState3 == 1 && direction == 1&& isActive3) && toFloor >= elevatorFloor3)
 			return 3;
-		if((elevatorState1 == 2 && direction == 2) && toFloor <= elevatorFloor1)
+		if((elevatorState1 == 2 && direction == 2 && isActive1) && toFloor <= elevatorFloor1)
 			return 1;
-		if((elevatorState2 == 2 && direction == 2) && toFloor <= elevatorFloor2)
+		if((elevatorState2 == 2 && direction == 2 && isActive2) && toFloor <= elevatorFloor2)
 			return 2;
-		if((elevatorState3 == 2 && direction == 2) && toFloor <= elevatorFloor3)
+		if((elevatorState3 == 2 && direction == 2 && isActive3) && toFloor <= elevatorFloor3)
 			return 3;
 		
 		//Implementation should prevent any situation where all of these fail; however recall function		
@@ -147,19 +154,49 @@ public class Scheduler {
 			//update the correct elevator
 			if(elevatorNumber==1) {
 				//direction: 0 = stop; 1 = up; 2 = down
+				if(data[1] == 4) {
+					System.out.println("Elevator Door Jammed Waiting for Fix");
+					if(!isActive1) { //door was already jammed elevator reporting its fixed
+						isActive1 = true;
+					}
+					isActive1 = false;
+					return;
+				}
 				elevatorState1 = data[1];
 				elevatorFloor1 = currFloor;
 				System.out.println("\n Updating E1: "+ elevatorState1+ ", "+elevatorFloor1+ "\n");
+				if(elevatorState1 == 4)
+					System.out.println("Elevator1 Jammed::: ERROR");
 			}
 			else if(elevatorNumber==2) {
+				if(data[1] == 4) {
+					System.out.println("Elevator Door Jammed Waiting for Fix");
+					if(!isActive2) { //door was already jammed elevator reporting its fixed
+						isActive2 = true;
+					}
+					isActive2 = false;
+					return;
+				}
 				elevatorState2 = data[1];
 				elevatorFloor2 = currFloor;
 				System.out.println("\n Updating E2: "+ elevatorState2+ ", "+elevatorFloor2+ "\n");
+				if(elevatorState2 == 4)
+					System.out.println("Elevator2 Jammed::: ERROR");
 			}
-			else {
+			else if (elevatorNumber == 3){
+				if(data[1] == 4) {
+					System.out.println("Elevator Door Jammed Waiting for Fix");
+					if(!isActive3) { //door was already jammed elevator reporting its fixed
+						isActive3 = true;
+					}
+					isActive3 = false;
+					return;
+				}
 				elevatorState3 = data[1];
 				elevatorFloor3 = currFloor;
 				System.out.println("\n Updating E3: "+ elevatorState3+ ", "+elevatorFloor3+ "\n");
+				if(elevatorState3 == 4)
+					System.out.println("Elevator3 Jammed::: ERROR");
 			}
 
 
@@ -218,9 +255,14 @@ public class Scheduler {
 	
 
 
+	@SuppressWarnings("deprecation")
 	void shutdownSystem() {
 		receiveSocket.close();
 		sendSocket.close();
+		t1.stop();
+		t2.stop();
+		t3.stop();
+		
 		System.exit(1);
 	}
 	void updateDate() {
@@ -235,3 +277,4 @@ public class Scheduler {
 		}
 	}
 }
+
