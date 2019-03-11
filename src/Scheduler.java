@@ -181,7 +181,7 @@ public class Scheduler {
 					E1Timer.stopTimer();
 				}
 				elevatorState1 = data[1];
-				elevatorFloor2 = currFloor;
+				elevatorFloor1 = currFloor;
 				System.out.println("\n Updating E1: " + elevatorState2 + ", " + elevatorFloor2 + "\n");
 			} 
 			
