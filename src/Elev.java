@@ -140,8 +140,12 @@ public class Elev extends Thread{
 	
 	
 	public void open_Close() {                                           
-		if(door == true) {   //if door open
+		if(door) {   //if door open
 			System.out.println("Elevator "+ this.elevatorNumber + " closing doors");
+			
+			if(jam) {
+				this.sendRequest(this.currentFloor, 4);
+			
 			while(jam == true) {
 				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....");
 				try {
@@ -155,10 +159,14 @@ public class Elev extends Thread{
 				System.out.println("Elevator "+ this.elevatorNumber + "closing doors");
 						
 			}
+			this.sendRequest(this.currentFloor, 4);
+			}
 			door = false; //close door
 		}
 		else {  //if door closed
 			System.out.println("Elevator "+ this.elevatorNumber + " Opening doors");
+			if(jam) {
+				this.sendRequest(this.currentFloor, 4);
 			while(jam == true) {
 				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....");
 				try {
@@ -171,7 +179,9 @@ public class Elev extends Thread{
 				jam=false;
 				System.out.println("Elevator "+ this.elevatorNumber + " Opening doors");						
 			}
-			door = false; //close door
+			this.sendRequest(this.currentFloor, 4);
+			}
+			door = true; //close door
 		}
 	}		
 
