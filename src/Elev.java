@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 public class Elev extends Thread{
 
@@ -22,10 +23,13 @@ public class Elev extends Thread{
 	private int myPort;
 	private Elevator contorller;
 
-	//new this itteration
+	
 	public boolean jam; //door jam sensor output
 	public boolean functioning;	//service state 
 	public ArrayList<Integer> elevLamp;
+	
+	//new this itteration
+	private boolean passenger; ///////////////////////////////////////////////////////////////////////
 	
 	public Elev(int elevNum, int floors, int port, Elevator thisController) {
 		this.contorller = thisController;
@@ -45,7 +49,7 @@ public class Elev extends Thread{
 		myPort = port;
 		jam = false; 						
 		functioning = true; 
-		
+		passenger = false; ///////////////////////////////////////////////////////////////////////
 		try {
 			sendSocket = new DatagramSocket(myPort);
 		} catch (SocketException e) {
@@ -60,7 +64,7 @@ public class Elev extends Thread{
 	public void addRequest(int initial, int desination) {
 		synchronized(this) {
 			this.serviceQueue.add(initial);
-			this.serviceQueue.add(desination);
+	//		this.serviceQueue.add(desination);
 			if (motor==1) {
 				System.out.print("E"+ this.elevatorNumber+ " queue: ");
 				Collections.sort(serviceQueue); // sorts list from smallest to largest
@@ -113,6 +117,7 @@ public class Elev extends Thread{
 					
 					this.open_Close();   					
 					Thread.sleep(3000);
+					this.displayButtons();      ////////////////////////////////////////////////////////
 					this.open_Close();						
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
 					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
@@ -185,17 +190,25 @@ public class Elev extends Thread{
 		}
 	}		
 
-	/*
-	 * public void displayButtons() { //will display buttons for gui, but act as
-	 * stud for new passengers boarding //display button as gui
-	 * 
-	 * if(this.passenger == false) { //if there wasnt a passenger, a new one boarded
-	 * Random rand = new Random(); int next = rand.nextInt(topFloor) + 1;
-	 * this.addRequest(next); passenger = true; if(next > currentFloor) {
-	 * this.sendRequest(currentFloor, 1); //going up } else {
-	 * this.sendRequest(currentFloor, 2); //going down } } else { passenger = false;
-	 * //if there was a passenger, then they got off } }
-	 */
+	
+	  public void displayButtons() { //will display buttons for gui, but act as //////////////////////////////////////////////////
+		 // stud for new passengers boarding //display button as gui
+	  
+		  if(this.passenger == false) { //if there wasnt a passenger, a new one boarded
+			  Random rand = new Random(); int next = rand.nextInt(topFloor) + 1;
+			  this.addRequest(next,0); passenger = true; 
+			  if(next > currentFloor) {
+				  this.sendRequest(currentFloor, 1); //going up 
+				  } else {
+				  this.sendRequest(currentFloor, 2); //going down 
+				  } 
+			  System.out.println("\n\n\n Elevator "+ this.elevatorNumber + " adding "+ next + "\n\n\n");
+			  } else { passenger = false;
+	  //if there was a passenger, then they got off 
+			  } 
+		  
+		  }
+	 
 
 	public void sendRequest(int currFloor, int direction) { // send new internal requests to the scheduler data->
 															// ID,direction,floor,floor
