@@ -1,8 +1,8 @@
 import java.util.Date;
-public class FaultScheduler extends Thread{
+public class FaultTimer extends Thread{
 	private Scheduler s;
 	private int preState, preFloor, elevator;
-	public FaultScheduler(Scheduler s, int elev) {
+	public FaultTimer(Scheduler s, int elev) {
 		this.s = s;
 		elevator = elev;
 	}
