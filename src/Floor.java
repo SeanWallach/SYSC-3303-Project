@@ -1,5 +1,5 @@
 //This class is the floor for the project
-//Last edited January 21st, 2016
+//Last edited 3/23/2019
 
 import java.io.*;
 import java.net.*;
@@ -47,14 +47,14 @@ public class Floor {
 	}
 	
 	
-	public void sendInstructions(String line) {
+	public void sendInstructions(String line) throws InterruptedException {
 	// For testing, prints line of the input file
 		System.out.println("Request made: " + line);	
 
 		 String[] splitted = line.split("\\s+");
 
 		 byte msg[] = new byte[5];	// Bit 0 - Direction 	Bit 1,2 - initial Floor   Bit 3,4 - des Floor
-
+	
 		 // Direction
 		 if (splitted[2].equals("up")) {
 		   msg[0] = 1;
@@ -122,8 +122,12 @@ public class Floor {
 			// TODO Auto-generated catch block
 			System.out.println("cant Sleep");
 		}
-		 
-		 /* Now receiving
+	}
+
+	
+	// For iteration 5
+	public void receiveMessage() {
+		// Now receiving
 		 byte data[] = new byte[3];
 		 receivePacket = new DatagramPacket(data, data.length);
 		 try {
@@ -137,10 +141,8 @@ public class Floor {
 		 // Form a String from the byte array.
 		 String received = new String(data,0,receivePacket.getLength());   
 		 System.out.println(received);
-		*/
 	}
 	
-
 	public static void main(String args[])
 	{
 	   Floor Floors[] = new Floor[numOfFloors]; 
@@ -152,15 +154,44 @@ public class Floor {
 	   Path path = Paths.get(fileName); 
 	   try {
 	 	  allLines = Files.readAllLines(path);
+	 	  int firstFloor = 0;
+	 	  int lastTime = 0;
 	 	  for (String line : allLines) {
 				temp = line;
 				String[] splitted = line.split("\\s+");		// Splits line
 				int floorNum = Integer.parseInt(splitted[1]);	// Get the floor number from line
+				
+				// if its not the first floor thats read from input.txt, we subtract the lastTime from the current time to find out how long to wait
+				if (firstFloor != 0) {
+					 // split splitted[0] by : to get ms, sec, etc
+					 String[] timeDelay = splitted[0].split(":");
+					 int msToWait = 0;
+					 msToWait += Integer.parseInt(timeDelay[3]);	// deals with ms
+					 msToWait += (1000*Integer.parseInt(timeDelay[2]));		// deals with s
+					 msToWait += (1000*60*Integer.parseInt(timeDelay[1]));		// deals with minutes
+					 msToWait += (1000*60*60*Integer.parseInt(timeDelay[0])); 	// deals with hours
+					 System.out.println("Time to wait: " + (msToWait - lastTime)/1000 + " seconds");
+					 Thread.sleep(msToWait - lastTime);
+					 lastTime = msToWait;
+				} else {
+					// split splitted[0] by : to get ms, sec, etc
+					String[] timeDelay = splitted[0].split(":");
+					lastTime += Integer.parseInt(timeDelay[3]);
+					lastTime += (1000*Integer.parseInt(timeDelay[2]));
+					lastTime += (1000*60*Integer.parseInt(timeDelay[1]));
+					lastTime += (1000*60*60*Integer.parseInt(timeDelay[0]));
+					System.out.println("Time to wait: 0 seconds");
+					firstFloor = 1;
+				}
+				
 				Floors[floorNum].sendInstructions(temp);
+				
 	     }
 	   } catch (IOException e) {
 	  	e.printStackTrace();  
-	   }
+	   } catch (InterruptedException e) {
+		e.printStackTrace();
+	}
 	   
 	}
 }
