@@ -64,7 +64,7 @@ public class Elev extends Thread{
 	public void addRequest(int initial, int desination) {
 		synchronized(this) {
 			this.serviceQueue.add(initial);
-			this.serviceQueue.add(desination);
+			//this.serviceQueue.add(desination);
 			if (motor==1) {
 				System.out.print("E"+ this.elevatorNumber+ " queue: ");
 				Collections.sort(serviceQueue); // sorts list from smallest to largest
@@ -117,7 +117,7 @@ public class Elev extends Thread{
 					
 					this.open_Close();   					
 					Thread.sleep(3000);
-					//this.displayButtons();      
+					this.displayButtons();      
 					this.open_Close();						
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
 					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");

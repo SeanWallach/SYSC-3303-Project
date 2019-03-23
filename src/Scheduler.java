@@ -289,7 +289,7 @@ public class Scheduler {
 	public static void main( String args[] ) throws IOException 
 	{
 		Scheduler a = new Scheduler();
-		if(measuring) new MeasurementOutput(a).start(); //throws exceptions
+		if(measuring) new MeasurementOutput(a).start(); //run measuring
 		while(true) {
 			a.receiveAndSend();
 		}
