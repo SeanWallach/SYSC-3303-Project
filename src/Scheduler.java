@@ -16,13 +16,11 @@ public class Scheduler {
 	Thread t1, t2, t3; //threads for monitoring elevators
 	Date currentDate; 
 	Boolean isActive1 = true, isActive2 = true, isActive3 = true; //To keep track of which elevators are talking to the scheduler
-	Elevator Uno, Dos, Tres;
 	int elevatorState1, elevatorState2, elevatorState3, //will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
 		elevatorFloor1, elevatorFloor2, elevatorFloor3; //collections, ArrayList? 
 	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, 
 			PACKETSIZE = 25, SELFPORT = 219, FLOORPORT = 238;
 	public ArrayList<Long> arrivalTimes = new ArrayList<Long>(); 
-	public ArrayList<Long> elevatorBTimes = new ArrayList<Long>(); 
 	public ArrayList<Long> floorBTimes = new ArrayList<Long>(); 
 	private static boolean measuring = true;
 	private long aStartTime, fStartTime;
@@ -66,9 +64,9 @@ public class Scheduler {
 		
 		if((elevatorState1 == 1 && direction == 1 && isActive1) && toFloor >= elevatorFloor1)
 			return 1;
-		if((elevatorState2 == 1 && direction == 1&& isActive2) && toFloor >= elevatorFloor2)
+		if((elevatorState2 == 1 && direction == 1 && isActive2) && toFloor >= elevatorFloor2)
 			return 2;
-		if((elevatorState3 == 1 && direction == 1&& isActive3) && toFloor >= elevatorFloor3)
+		if((elevatorState3 == 1 && direction == 1 && isActive3) && toFloor >= elevatorFloor3)
 			return 3;
 		if((elevatorState1 == 2 && direction == 2 && isActive1) && toFloor <= elevatorFloor1)
 			return 1;
@@ -82,6 +80,7 @@ public class Scheduler {
 		}
 		//Implementation should prevent any situation where all of these fail; however recall function		
 		return getBestElevator(toFloor, direction);
+
 	}
 
 	private void sendElevator(int elev, int floor, byte msg[]) {
@@ -112,7 +111,7 @@ public class Scheduler {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		if(measuring) floorBTimes.add(System.nanoTime() - fStartTime);
+		if(measuring) floorBTimes.add(System.nanoTime() - fStartTime);//packet send measure elapsed time
 		System.out.println("Server: packet sent");
 
 	}
@@ -220,7 +219,7 @@ public class Scheduler {
 
 		}
 		else { //1 is arbitrary (from client/Button)
-			if(measuring) fStartTime = System.nanoTime();//start for assigning
+			if(measuring) fStartTime = System.nanoTime();//start for arrival time
 			System.out.println("recieved from floor");
 			byte msg[] = new byte[PACKETSIZE];
 			int direction = data[0];

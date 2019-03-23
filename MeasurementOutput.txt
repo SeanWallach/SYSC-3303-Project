@@ -1,18 +1,25 @@
 ***Arrival Times***
-TIME:  12400   Time from start up
-TIME:  12000   Time from start up
-TIME:  10100   Time from start up
-TIME:  11600
-TIME:  32700
-TIME:  32800
-TIME:  26200
-TIME:  42200
-TIME:  4400
-
+TIME:  12800   Time from start up
+TIME:  11600   Time from start up
+TIME:  9400   Time from start up
+TIME:  51100
+TIME:  8300
+TIME:  30600
+TIME:  18100
+TIME:  17800
+TIME:  32500
+TIME:  20700
+TIME:  9100
+TIME:  3900
+TIME:  26900
+Median: 17800
+Mean: 19446
 
 ***Floor Button Times***
-TIME:  150500
-TIME:  37700
-TIME:  134800
-TIME:  133400
-TIME:  112600
+TIME:  117200
+TIME:  94700
+TIME:  50800
+TIME:  105600
+TIME:  32000
+Median: 94700
+Mean: 80060
