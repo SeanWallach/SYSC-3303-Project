@@ -29,7 +29,7 @@ public class Elev extends Thread{
 	public ArrayList<Integer> elevLamp;
 	
 	//new this itteration
-	private boolean passenger; ///////////////////////////////////////////////////////////////////////
+	private boolean passenger; 
 	
 	public Elev(int elevNum, int floors, int port, Elevator thisController) {
 		this.contorller = thisController;
@@ -49,7 +49,7 @@ public class Elev extends Thread{
 		myPort = port;
 		jam = false; 						
 		functioning = true; 
-		passenger = false; ///////////////////////////////////////////////////////////////////////
+		passenger = false; 
 		try {
 			sendSocket = new DatagramSocket(myPort);
 		} catch (SocketException e) {
@@ -117,7 +117,7 @@ public class Elev extends Thread{
 					
 					this.open_Close();   					
 					Thread.sleep(3000);
-					this.displayButtons();      ////////////////////////////////////////////////////////
+					this.displayButtons();      
 					this.open_Close();						
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
 					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
@@ -191,7 +191,7 @@ public class Elev extends Thread{
 	}		
 
 	
-	  public void displayButtons() { //will display buttons for gui, but act as //////////////////////////////////////////////////
+	  public void displayButtons() { //will display buttons for gui, but act as 
 		 // stud for new passengers boarding //display button as gui
 	  
 		  if(this.passenger == false) { //if there wasnt a passenger, a new one boarded

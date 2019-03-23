@@ -21,13 +21,18 @@ public class Scheduler {
 		elevatorFloor1, elevatorFloor2, elevatorFloor3; //collections, ArrayList? 
 	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, 
 			PACKETSIZE = 25, SELFPORT = 219, FLOORPORT = 238;
+	public ArrayList<Long> arrivalTimes = new ArrayList<Long>(); 
+	public ArrayList<Long> elevatorBTimes = new ArrayList<Long>(); 
+	public ArrayList<Long> floorBTimes = new ArrayList<Long>(); 
+	private static boolean measuring = true;
+	private long aStartTime, fStartTime;
 
 	public Scheduler()
 	{
 		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; elevatorFloor2 = 0; elevatorFloor3 = 0; //all elevators should be idle at startup
-	    t1 = new Thread(new FaultScheduler(this, 1));
-		t2 = new Thread(new FaultScheduler(this, 2));
-		t3 = new Thread(new FaultScheduler(this, 3));
+	    t1 = new Thread(new FaultTimer(this, 1));
+		t2 = new Thread(new FaultTimer(this, 2));
+		t3 = new Thread(new FaultTimer(this, 3));
 		try {
 			// Construct a datagram socket and bind it to any available 
 			// port on the local host machine. This socket will be used to
@@ -96,6 +101,8 @@ public class Scheduler {
 			elevatorState1=msg[1];
 		}
 		
+		//add to floor times
+		
 		sendPacket = new DatagramPacket(msg, msg.length,
 				receivePacket.getAddress(), 68);
 		// Send the datagram packet to the client via the send socket. 
@@ -105,7 +112,7 @@ public class Scheduler {
 			e.printStackTrace();
 			System.exit(1);
 		}
-
+		if(measuring) floorBTimes.add(System.nanoTime() - fStartTime);
 		System.out.println("Server: packet sent");
 
 	}
@@ -141,9 +148,11 @@ public class Scheduler {
 		System.out.println("Length: " + len);
 		System.out.print("Containing: " );
 		System.out.println(this.receivePacket.getData());
+		
 
 		//decode request and assign toFloor as the floor that will be sent to elevator
 		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3) { //received from elevator
+			if(measuring&&data[1]==0) {aStartTime = System.nanoTime();}//start time for arrival
 			System.out.println("Received from elevator");
 			int elevatorNumber = data[0];
 			int floorDecode = data[2];
@@ -166,6 +175,7 @@ public class Scheduler {
 					return;
 				}
 				elevatorState1 = data[1];
+				if(data[1]==0 && measuring) arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 				elevatorFloor1 = currFloor;
 				System.out.println("\n Updating E1: "+ elevatorState1+ ", "+elevatorFloor1+ "\n");
 				if(elevatorState1 == 4)
@@ -181,6 +191,7 @@ public class Scheduler {
 					return;
 				}
 				elevatorState2 = data[1];
+				if(data[1]==0 && measuring) arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 				elevatorFloor2 = currFloor;
 				System.out.println("\n Updating E2: "+ elevatorState2+ ", "+elevatorFloor2+ "\n");
 				if(elevatorState2 == 4)
@@ -196,16 +207,20 @@ public class Scheduler {
 					return;
 				}
 				elevatorState3 = data[1];
+				if(data[1]==0 && measuring) arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 				elevatorFloor3 = currFloor;
 				System.out.println("\n Updating E3: "+ elevatorState3+ ", "+elevatorFloor3+ "\n");
 				if(elevatorState3 == 4)
 					System.out.println("Elevator3 Jammed::: ERROR");
 			}
-
+			
+			
+			
 
 
 		}
 		else { //1 is arbitrary (from client/Button)
+			if(measuring) fStartTime = System.nanoTime();//start for assigning
 			System.out.println("recieved from floor");
 			byte msg[] = new byte[PACKETSIZE];
 			int direction = data[0];
@@ -272,9 +287,10 @@ public class Scheduler {
 		currentDate = new Date();
 	}
 
-	public static void main( String args[] )
+	public static void main( String args[] ) throws IOException 
 	{
 		Scheduler a = new Scheduler();
+		if(measuring) new MeasurementOutput(a).start(); //throws exceptions
 		while(true) {
 			a.receiveAndSend();
 		}

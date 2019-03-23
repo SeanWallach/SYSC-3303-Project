@@ -1,0 +1,18 @@
+***Arrival Times***
+TIME:  12400   Time from start up
+TIME:  12000   Time from start up
+TIME:  10100   Time from start up
+TIME:  11600
+TIME:  32700
+TIME:  32800
+TIME:  26200
+TIME:  42200
+TIME:  4400
+
+
+***Floor Button Times***
+TIME:  150500
+TIME:  37700
+TIME:  134800
+TIME:  133400
+TIME:  112600
