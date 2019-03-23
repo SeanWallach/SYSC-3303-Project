@@ -4,30 +4,38 @@
 // UDP/IP. The server receives from a client (elevator button/user) or server (Elevator) a packet 
 // containing a data array with floor and direction, then forwards it to the other client or server.
 // Last edited Feb 9th 2019
-
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
 public class Scheduler {
-
+    //ConcurrentLinkedQueue q;
+    
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendSocket, receiveSocket;
+	long[] q1, q2; 
 	Thread t1, t2, t3; //threads for monitoring elevators
 	Date currentDate; 
 	Boolean isActive1 = true, isActive2 = true, isActive3 = true; //To keep track of which elevators are talking to the scheduler
 	Elevator Uno, Dos, Tres;
 	int elevatorState1, elevatorState2, elevatorState3, //will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
-		elevatorFloor1, elevatorFloor2, elevatorFloor3; //collections, ArrayList? 
+		elevatorFloor1, elevatorFloor2, elevatorFloor3,
+		counter1, counter2;//collections, ArrayList? 
 	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, 
 			PACKETSIZE = 25, SELFPORT = 219, FLOORPORT = 238;
 
 	public Scheduler()
 	{
-		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; elevatorFloor2 = 0; elevatorFloor3 = 0; //all elevators should be idle at startup
-	    t1 = new Thread(new FaultScheduler(this, 1));
-		t2 = new Thread(new FaultTimer(this, 2));
-		t3 = new Thread(new FaultTimer(this, 3));
+		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; elevatorFloor2 = 0; elevatorFloor3 = 0; counter1 = 0; counter2 = 0; //all elevators should be idle at startup
+		q1 = new long[10];
+		q2 = new long[10];
+		t1 = new Thread(new FaultScheduler(this, 1));
+		t2 = new Thread(new FaultScheduler(this, 2));a
+		t3 = new Thread(new FaultScheduler(this, 3));
+		//q = new ConcurrentLinkedQueue();
 		try {
 			// Construct a datagram socket and bind it to any available 
 			// port on the local host machine. This socket will be used to
@@ -35,7 +43,7 @@ public class Scheduler {
 			sendSocket = new DatagramSocket();
 
 			// Construct a datagram socket and bind it to port 23 
-			// on the local host machine. This socket will be used to
+			// on the local host machine. This socket will be used to//
 			// receive UDP Datagram packets from the client
 			receiveSocket = new DatagramSocket(SELFPORT);
 			
@@ -143,7 +151,8 @@ public class Scheduler {
 		System.out.println(this.receivePacket.getData());
 
 		//decode request and assign toFloor as the floor that will be sent to elevator
-		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3) { //received from elevator
+		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3) {
+			long start = System.nanoTime();//received from elevator
 			System.out.println("Received from elevator");
 			int elevatorNumber = data[0];
 			int floorDecode = data[2];
@@ -203,9 +212,20 @@ public class Scheduler {
 			}
 
 
-
+			long end = System.nanoTime();
+			q1[counter2] = (end - start);
+			counter1++;
+			if(counter1 == 10) {
+				long temp = 0;
+				for(int i = 0; i < 10; i++) {
+					temp = temp + q1[i];
+				}
+				System.out.println("Mean of last 10 elevators sent is: "+ temp/10/1000000 +"ms");
+				counter1 = 0;
+			}
 		}
 		else { //1 is arbitrary (from client/Button)
+			long start = System.nanoTime();
 			System.out.println("recieved from floor");
 			byte msg[] = new byte[PACKETSIZE];
 			int direction = data[0];
@@ -238,22 +258,17 @@ public class Scheduler {
 			System.out.println(this.receivePacket.getData() + "\n");
 			// or (as we should be sending back the same thing)
 			// System.out.println(received);
+			long end = System.nanoTime();
+			q2[counter2] = end - start;
+			if(counter2 == 10) {
+				long temp = 0;
+				for(int i = 0; i< 10; i++) {
+					temp = temp + q2[i];
+				}
+				System.out.println("Mean of last 10 Button updates is: " + temp/10/1000000 + "ms");
+			}
 		}
-		//decode data packet from elevator and update status bars for elevators
-		
-
-		/* Slow things down (wait 2 seconds)
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e ) {
-			e.printStackTrace();
-			System.exit(1);
-		}*/
-
-
-
-
-		//Identify and get best elevators port for send pack		
+			
 	}
 	
 
@@ -280,3 +295,4 @@ public class Scheduler {
 		}
 	}
 }
+
