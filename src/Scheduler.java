@@ -28,7 +28,8 @@ public class Scheduler {
 	public Scheduler()
 	{
 		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; elevatorFloor2 = 0; elevatorFloor3 = 0; //all elevators should be idle at startup
-	    t1 = new Thread(new FaultTimer(this, 1));
+	  t1 = new Thread(new FaultTimer(this, 1));
+
 		t2 = new Thread(new FaultTimer(this, 2));
 		t3 = new Thread(new FaultTimer(this, 3));
 		try {
