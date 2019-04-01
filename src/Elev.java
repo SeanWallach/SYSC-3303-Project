@@ -9,7 +9,7 @@ import java.util.Random;
 public class Elev extends Thread{
 
 	private int elevatorNumber;
-	private int motor; // 0==stop 1==up 2==down
+	private int motor; // 0==idle 1==up 2==down, 3==stopped but busy, 4==jammed 
 	private int topFloor;
 	private boolean door; // false=closed true=open
 	
@@ -29,7 +29,7 @@ public class Elev extends Thread{
 	public ArrayList<Integer> elevLamp;
 	
 	//new this itteration
-	private boolean passenger; ///////////////////////////////////////////////////////////////////////
+	private boolean passenger; 
 	
 	public Elev(int elevNum, int floors, int port, Elevator thisController) {
 		this.contorller = thisController;
@@ -49,7 +49,7 @@ public class Elev extends Thread{
 		myPort = port;
 		jam = false; 						
 		functioning = true; 
-		passenger = false; ///////////////////////////////////////////////////////////////////////
+		passenger = false; 
 		try {
 			sendSocket = new DatagramSocket(myPort);
 		} catch (SocketException e) {
@@ -64,7 +64,7 @@ public class Elev extends Thread{
 	public void addRequest(int initial, int desination) {
 		synchronized(this) {
 			this.serviceQueue.add(initial);
-	//		this.serviceQueue.add(desination);
+			//this.serviceQueue.add(desination);
 			if (motor==1) {
 				System.out.print("E"+ this.elevatorNumber+ " queue: ");
 				Collections.sort(serviceQueue); // sorts list from smallest to largest
@@ -117,7 +117,7 @@ public class Elev extends Thread{
 					
 					this.open_Close();   					
 					Thread.sleep(3000);
-					this.displayButtons();      ////////////////////////////////////////////////////////
+					this.displayButtons();      
 					this.open_Close();						
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
 					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
@@ -146,13 +146,13 @@ public class Elev extends Thread{
 	
 	public void open_Close() {                                           
 		if(door) {   //if door open
-			System.out.println("Elevator "+ this.elevatorNumber + " closing doors");
+			System.out.println("Elevator "+ this.elevatorNumber + " closing doors\n");
 			
 			if(jam) {
 				this.sendRequest(this.currentFloor, 4);
 			
 			while(jam == true) {
-				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....");
+				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....\n");
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
@@ -161,7 +161,7 @@ public class Elev extends Thread{
 				} 
 				System.out.println("Elevator "+ this.elevatorNumber + "Jam Fixed");
 				jam=false;
-				System.out.println("Elevator "+ this.elevatorNumber + "closing doors");
+				System.out.println("Elevator "+ this.elevatorNumber + "closing doors\n");
 						
 			}
 			this.sendRequest(this.currentFloor, 4);
@@ -169,11 +169,11 @@ public class Elev extends Thread{
 			door = false; //close door
 		}
 		else {  //if door closed
-			System.out.println("Elevator "+ this.elevatorNumber + " Opening doors");
+			System.out.println("Elevator "+ this.elevatorNumber + " Opening doors\n");
 			if(jam) {
 				this.sendRequest(this.currentFloor, 4);
 			while(jam == true) {
-				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....");
+				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....\n");
 				try {
 					Thread.sleep(2000);
 				} catch (InterruptedException e) {
@@ -182,7 +182,7 @@ public class Elev extends Thread{
 				} 
 				System.out.println("Elevator "+ this.elevatorNumber + "Jam Fixed");
 				jam=false;
-				System.out.println("Elevator "+ this.elevatorNumber + " Opening doors");						
+				System.out.println("Elevator "+ this.elevatorNumber + " Opening doors\n");						
 			}
 			this.sendRequest(this.currentFloor, 4);
 			}
@@ -191,7 +191,7 @@ public class Elev extends Thread{
 	}		
 
 	
-	  public void displayButtons() { //will display buttons for gui, but act as //////////////////////////////////////////////////
+	  public void displayButtons() { //will display buttons for gui, but act as 
 		 // stud for new passengers boarding //display button as gui
 	  
 		  if(this.passenger == false) { //if there wasnt a passenger, a new one boarded
