@@ -4,6 +4,7 @@
 // UDP/IP. The server receives from a client (elevator button/user) or server (Elevator) a packet 
 // containing a data array with floor and direction, then forwards it to the other client or server.
 // Last edited Feb 9th 2019
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.*;
@@ -38,10 +39,10 @@ public class Scheduler {
 		elevatorState4 = 0; elevatorFloor4 = 0;//all elevators should be idle at startup
 		q1 = new long[10];
 		q2 = new long[10];
-		t1 = new Thread(new FaultTimer(this, 1));
-		t2 = new Thread(new FaultTimer(this, 2));
-		t3 = new Thread(new FaultTimer(this, 3));
-		t4 = new Thread(new FaultTimer(this, 4));
+		t1 = new Thread(new FaultScheduler(this, 1));
+		t2 = new Thread(new FaultScheduler(this, 2));
+		t3 = new Thread(new FaultScheduler(this, 3));
+		t4 = new Thread(new FaultScheduler(this, 4));
 		//t4?? Will fault scheduling be needed?
 		//q = new ConcurrentLinkedQueue();
 		try {
@@ -144,6 +145,7 @@ public class Scheduler {
 		updateDate();
 		int toFloor = 0;
 		byte data[] = new byte[PACKETSIZE];
+		byte msg[] = new byte[PACKETSIZE];
 		receivePacket = new DatagramPacket(data, data.length);
 		System.out.println("Scheduler: Waiting for Packet.\n");
 
@@ -257,6 +259,7 @@ public class Scheduler {
 				}
 				elevatorState1 = data[1];
 				elevatorFloor1 = currFloor;
+				
 				System.out.println("\n Updating E4: "+ elevatorState4+ ", "+elevatorFloor4+ "\n");
 				if(elevatorState1 == 4)
 					System.out.println("Elevator4 Jammed::: ERROR");
@@ -265,11 +268,23 @@ public class Scheduler {
 			if(data[1]==0 && measuring) {
 				arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 			}
+			msg[0] = data[0];
+			msg[1] = data[1];
+			msg[2] = data[2];
+			sendPacket = new DatagramPacket(msg, msg.length,
+					receivePacket.getAddress(), FLOORPORT);
+			try {
+				sendSocket.send(sendPacket);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
 		}
 		else { //1 is arbitrary (from client/Button)
 			long start = System.nanoTime();
 			System.out.println("received from floor");
-			byte msg[] = new byte[PACKETSIZE];
+			
 			int direction = data[0];
 			
 			msg[1] = (byte)direction; //direction
@@ -300,18 +315,10 @@ public class Scheduler {
 			System.out.println(this.receivePacket.getData() + "\n");
 			// or (as we should be sending back the same thing)
 			// System.out.println(received);
-			long end = System.nanoTime();
-			q2[counter2] = end - start;
-			if(counter2 == 10) {
-				long temp = 0;
-				for(int i = 0; i< 10; i++) {
-					temp = temp + q2[i];
-				}
-				System.out.println("Mean of last 10 Button updates is: " + temp/10/1000000 + "ms");
-			}
+			//System.out.println("Mean of last 10 Button updates is: " + temp/10/1000000 + "ms");			}
 		}
-			
 	}
+	
 	
 
 
@@ -331,17 +338,10 @@ public class Scheduler {
 
 	public static void main( String args[] )
 	{
-		Scheduler a = new Scheduler();
 		if(measuring) {
-			try {
-				new MeasurementOutput(a).start();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} //run measuring
-			
+			new MeasurementOutput.start(); //run measuring
 		}
-		
+		Scheduler a = new Scheduler();
 		while(true) {
 			a.receiveAndSend();
 		}
