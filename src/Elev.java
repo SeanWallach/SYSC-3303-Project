@@ -206,7 +206,11 @@ public class Elev extends Thread{
 		byte data[] = new byte[4];
 		data[0] = (byte) elevatorNumber;
 		data[1] = (byte) direction;
-		if (currFloor >= 10) {
+		if(currFloor >=20) {
+			data[2] = (byte) 2;
+			data[3] = (byte) (currFloor - 20);
+		}
+		else if (currFloor >= 10) {
 			data[2] = (byte) 1;
 			data[3] = (byte) (currFloor - 10);
 		} else {
