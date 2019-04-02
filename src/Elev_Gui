@@ -155,11 +155,12 @@ public class Elev_Gui {
 	    		
 	    	}  
 	    	});  
-	    f.add(b);f.add(tf);  
+	    f.add(b);*/ 
+	    f.add(tf);  
 	    f.setSize(500,1000);  
 	    f.setLayout(null);  
 	    f.setVisible(true);   
-	*/ 
+	
 
   }
  
