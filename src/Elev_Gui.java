@@ -37,7 +37,7 @@ public class Elev_Gui {
 		this.topFloor = floors;
 		floor = new JButton[floors];
 		fButton = new JButton[floors];
-		count = 6;/////////////////////////////////////////////////////
+		
 		this.createGui(floors, elevNum);
 		
 	}
@@ -87,7 +87,7 @@ public class Elev_Gui {
 		if(Color.RED.equals(this.fButton[floor-1].getBackground())) {
 			this.fButton[floor-1].setBackground(Color.WHITE);
 			this.fButton[floor-1].setEnabled(true);
-			tf.setText(" Floor: "+floor+"  STOP ");
+			
 		}
 		
 	}
@@ -183,6 +183,7 @@ public class Elev_Gui {
 
   }
 	public void door(boolean open) {
+		tf.setText(" Floor: "+elevator.getCurrentFLoor()+"  STOP ");
 		if(open) {
 			door[0].setVisible(true);
 			door[1].setVisible(false);
