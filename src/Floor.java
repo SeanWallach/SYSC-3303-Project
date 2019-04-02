@@ -51,11 +51,11 @@ public class Floor {
 		 this.request.add(floor);
 		 byte msg[] = new byte[5];	// Bit 0 - Direction 	Bit 1,2 - destination Floor   
 		 msg[0] = (byte)direction;
-		 if(floor>19) {
+		 if(floor>=20) {
 			 msg[1]=2;
 			 msg[2] = (byte)(floor-20);
 		 }
-		 else if(floor>9) {
+		 else if(floor>=10) {
 			 msg[1]=1;
 			 msg[2] = (byte)(floor-10);
 		 }
@@ -65,6 +65,7 @@ public class Floor {
 		 }
 		msg[3] =0;
 		msg[4] =0;
+		 System.out.print(msg[0]+" "+msg[1]+" "+msg[2]+"\n");
 		 try {
 		    sendPacket = new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(), SCHEDULER_PORT);
 		    sendReceiveSocket.send(sendPacket);
@@ -83,12 +84,14 @@ public class Floor {
 
 	public void verify(int floor) {
 		int count=0;
+		System.out.println("verify: "+floor);
 		for(int fl: this.request) {
 			if(floor==fl) {
 				this.request.remove(count);
 			}
 			count++;
 		}
+		this.receiveMessage();
 	}
 	
 	// For iteration 5
@@ -103,15 +106,17 @@ public class Floor {
 		    e.printStackTrace();
 		    System.exit(1);
 		 }
-		 int eleFloor;
-		 	if(temp[2]>=20) {
-		 		eleFloor = temp[3] + 20;
+		 System.out.print(temp[0]+" "+temp[1]+" "+temp[2]+"\n");
+		 int eleFloor = 0;
+		 	if(temp[1]>=2) {
+		 		eleFloor = temp[2] + 20;
 			}
-			else if (temp[2] >= 10) {
-				eleFloor = temp[3] + 10;
+			else if (temp[1] >= 1) {
+				eleFloor = temp[2] + 10;
 			} else {
-				eleFloor = temp[3];
+				eleFloor = temp[2];
 			}
+		 	System.out.print(eleFloor);
 		this.verify(eleFloor);///////////////////////////////////////////////////
 		 
 		 System.out.print("Received content containing: ");
