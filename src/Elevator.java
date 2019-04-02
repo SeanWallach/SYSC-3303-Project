@@ -11,7 +11,7 @@ public class Elevator {
 	private static Elev elev1;
 	private static Elev elev2;
 	private static Elev elev3;
-	
+	private static Elev elev4;
 
 	public Elevator() {
 		// create nmuber of elev starting at prot 69
@@ -54,10 +54,10 @@ public class Elevator {
 		byte[] temp = receivePacket.getData();
 		int initial, destination;
 		
-		if(temp[2]>=20) {
+		if(temp[2]>=2) {////////////////////////
 			initial = temp[3] + 20;
 		}
-		else if (temp[2] >= 10) {
+		else if (temp[2] >= 1) {////////////////////////
 			initial = temp[3] + 10;
 		} else {
 			initial = temp[3];
@@ -83,6 +83,10 @@ public class Elevator {
 			System.out.println("------Adding to Elevator 3-------");
 			elev3.requestWaiting=true;
 			elev3.addRequest(initial, destination);
+		} else if (temp[0] == 4) {
+			System.out.println("------Adding to Elevator 3-------");
+			elev4.requestWaiting=true;
+			elev4.addRequest(initial, destination);
 		}
 
 	}
@@ -98,9 +102,11 @@ public class Elevator {
 		elev1 = new Elev(1, 22, 69, elevator);
 		elev2 = new Elev(2, 22, 70, elevator);
 		elev3 = new Elev(3, 22, 71, elevator);
+		elev4 = new Elev(4, 22, 72, elevator);
 		elev1.start();
 		elev2.start();
 		elev3.start();
+		elev4.start();
 		Break destruction = new Break(elev1,elev2,elev3);			////////////////////////////////////////////////////////////////////
 		//destruction.start();										////////////////////////////////////////////////////////////////////
 		while (true) {
