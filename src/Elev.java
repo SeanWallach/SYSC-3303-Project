@@ -30,6 +30,7 @@ public class Elev extends Thread{
 	
 	//new this itteration
 	private boolean passenger; 
+	private Elev_Gui gui;
 	
 	public Elev(int elevNum, int floors, int port, Elevator thisController) {
 		this.contorller = thisController;
@@ -56,12 +57,14 @@ public class Elev extends Thread{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		gui = new Elev_Gui(this.elevatorNumber,floors,this);
 
 		this.sendRequest(currentFloor, motor);
 
 	}
 
-	public void addRequest(int initial, int desination) {
+	public void addRequest(int initial, int dummy) {
 		synchronized(this) {
 			this.serviceQueue.add(initial);
 			//this.serviceQueue.add(desination);
@@ -117,18 +120,20 @@ public class Elev extends Thread{
 					
 					this.open_Close();   					
 					Thread.sleep(3000);
-					this.displayButtons();      
+		//			this.displayButtons();      
 					this.open_Close();						
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
 					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
 					this.currentFloor++;
 					this.motor = 1;
+					this.gui.move(this.currentFloor, this.motor);
 					this.sendRequest(this.currentFloor, this.motor);
 					Thread.sleep(1000);
 				} else if(this.serviceQueue.get(0) < this.currentFloor){
 					System.out.println("E"+ this.elevatorNumber+" going down, current floor: " + currentFloor+"\n");
 					this.currentFloor--;
 					this.motor = 2;
+					this.gui.move(this.currentFloor, this.motor);
 					this.sendRequest(this.currentFloor, this.motor);
 					Thread.sleep(1000);
 				}
@@ -141,7 +146,9 @@ public class Elev extends Thread{
 	public int getCurrentFLoor() {			
 		return this.currentFloor;
 	}
-	
+	public int getDirection() {
+		return this.motor;
+	}
 	
 	
 	public void open_Close() {                                           
