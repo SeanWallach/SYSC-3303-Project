@@ -91,9 +91,9 @@ public class Elevator {
 		// create new elevator then wait to receive as receiver, then run proper
 		// elevator set by skeddy
 		Elevator elevator = new Elevator();
-		elev1 = new Elev(1, 10, 69, elevator);
-		elev2 = new Elev(2, 10, 70, elevator);
-		elev3 = new Elev(3, 10, 71, elevator);
+		elev1 = new Elev(1, 22, 69, elevator);
+		elev2 = new Elev(2, 22, 70, elevator);
+		elev3 = new Elev(3, 22, 71, elevator);
 		elev1.start();
 		elev2.start();
 		elev3.start();
