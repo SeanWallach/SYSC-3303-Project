@@ -112,7 +112,7 @@ public class Floor {
 			} else {
 				eleFloor = temp[3];
 			}
-	//	this.verify(eleFloor);///////////////////////////////////////////////////
+		this.verify(eleFloor);///////////////////////////////////////////////////
 		 
 		 System.out.print("Received content containing: ");
 		 // Form a String from the byte array.
