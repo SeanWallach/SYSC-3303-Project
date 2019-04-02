@@ -4,7 +4,6 @@
 // UDP/IP. The server receives from a client (elevator button/user) or server (Elevator) a packet 
 // containing a data array with floor and direction, then forwards it to the other client or server.
 // Last edited Feb 9th 2019
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.*;
@@ -270,7 +269,7 @@ public class Scheduler {
 			}
 			msg[0] = data[0];
 			msg[1] = data[1];
-			msg[2] = data[2];
+			msg[2] = data[3];///////////////////////////////////////////
 			sendPacket = new DatagramPacket(msg, msg.length,
 					receivePacket.getAddress(), FLOORPORT);
 			try {
@@ -339,11 +338,16 @@ public class Scheduler {
 	}
 
 	public static void main( String args[] )
-	{
+	{	Scheduler a = new Scheduler();
 		if(measuring) {
-			new MeasurementOutput.start(); //run measuring
+			try {
+				new MeasurementOutput(a).start();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} //run measuring
 		}
-		Scheduler a = new Scheduler();
+		
 		while(true) {
 			a.receiveAndSend();
 		}
