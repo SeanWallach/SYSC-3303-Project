@@ -4,6 +4,7 @@
 // UDP/IP. The server receives from a client (elevator button/user) or server (Elevator) a packet 
 // containing a data array with floor and direction, then forwards it to the other client or server.
 // Last edited Feb 9th 2019
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.*;
@@ -38,10 +39,10 @@ public class Scheduler {
 		elevatorState4 = 0; elevatorFloor4 = 0;//all elevators should be idle at startup
 		q1 = new long[10];
 		q2 = new long[10];
-		t1 = new Thread(new FaultTimer(this, 1));
-		t2 = new Thread(new FaultTimer(this, 2));
-		t3 = new Thread(new FaultTimer(this, 3));
-		t4 = new Thread(new FaultTimer(this, 4));
+		t1 = new Thread(new FaultScheduler(this, 1));
+		t2 = new Thread(new FaultScheduler(this, 2));
+		t3 = new Thread(new FaultScheduler(this, 3));
+		t4 = new Thread(new FaultScheduler(this, 4));
 		//t4?? Will fault scheduling be needed?
 		//q = new ConcurrentLinkedQueue();
 		try {
@@ -281,7 +282,6 @@ public class Scheduler {
 			
 		}
 		else { //1 is arbitrary (from client/Button)
-			long start = System.nanoTime();
 			System.out.println("received from floor");
 			
 			int direction = data[0];
@@ -292,8 +292,11 @@ public class Scheduler {
 			if(floorRequest0 == 0) {
 				toFloor = floorRequest1;
 			}
-			else {
+			else if (floorRequest0 == 1){
 				toFloor = floorRequest1 + 10;
+			}
+			else if (floorRequest0 == 2) {
+				toFloor = floorRequest1 + 20;
 			}
 			msg[2] = data[1];
 			msg[3] = data[2];
@@ -337,16 +340,10 @@ public class Scheduler {
 
 	public static void main( String args[] )
 	{
-		Scheduler a = new Scheduler();
 		if(measuring) {
-			try {
-				new MeasurementOutput(a).start();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} //run measuring
+			new MeasurementOutput.start(); //run measuring
 		}
-		
+		Scheduler a = new Scheduler();
 		while(true) {
 			a.receiveAndSend();
 		}
