@@ -1,261 +1,166 @@
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.*;  
+import javax.swing.*; 
 
-public class Elev extends Thread{
+import javax.swing.JButton;
+import javax.swing.JFrame;
 
-	private int elevatorNumber;
-	private int motor; // 0==idle 1==up 2==down, 3==stopped but busy, 4==jammed 
+import javafx.event.ActionEvent;
+
+
+
+
+
+
+public class Elev_Gui {
+	
+	private int elevNumber;
+	private Elev elevator;
 	private int topFloor;
-	private boolean door; // false=closed true=open
+	private JButton[] floor;
+	private JButton[] fButton;
+	private JTextField tf;
 	
-	private int[] buttons;
-	private int currentFloor; // 1 is default
-	private ArrayList<Integer> serviceQueue; // floors that will be serviced in organized order
-	public boolean requestWaiting;
-
-	private int SEND_PORT_NUMBER = 219; // schedualer port
-	private DatagramSocket sendSocket;
-	private int myPort;
-	private Elevator contorller;
-
+	//temporary test variables
+	private int count;
 	
-	public boolean jam; //door jam sensor output
-	public boolean functioning;	//service state 
-	public ArrayList<Integer> elevLamp;
+	public Elev_Gui(int elevNum, int floors,Elev elev) {
+		elevNumber = elevNum;
+		elevator = elev;
+		this.topFloor = floors;
+		floor = new JButton[floors];
+		fButton = new JButton[floors];
+		count = 6;/////////////////////////////////////////////////////
+		this.createGui(floors, elevNum);
+		
+	}
 	
-	//new this itteration
-	private boolean passenger; 
-	private Elev_Gui gui;
-	
-	public Elev(int elevNum, int floors, int port, Elevator thisController) {
-		this.contorller = thisController;
-		requestWaiting=false;
-		buttons = new int[floors];
-		for (int i = 1; i <= floors; i++) {
-			buttons[i - 1] = i;
+	public static void main(String[] args) {
+		Elevator elevator = new Elevator();
+		Elev elev1 = new Elev(1, 22, 69, elevator);
+		Elev_Gui G = new Elev_Gui(1,22,elev1);
+		
+	} 
+	public void move(int floor,int direction) {
+		//change the colour of specific button 
+		if(floor ==1) {
+			this.floor[floor].setBackground(Color.WHITE);
+			this.floor[floor-1].setBackground(Color.BLUE);
+			if(direction == 1) {
+				tf.setText(" Floor: "+floor+"  UP ");
+			}
+			else {
+				tf.setText(" Floor: "+floor+"  DOWN ");
+			}
+		}
+		else if(floor == this.topFloor) {
+			this.floor[floor-2].setBackground(Color.WHITE);
+			this.floor[floor-1].setBackground(Color.BLUE);
+			if(direction == 1) {
+				tf.setText(" Floor: "+floor+"  UP ");
+			}
+			else {
+				tf.setText(" Floor: "+floor+"  DOWN ");
+			}
+		}
+		else {
+		this.floor[floor].setBackground(Color.WHITE);
+		this.floor[floor-2].setBackground(Color.WHITE);
+		this.floor[floor-1].setBackground(Color.BLUE);
+		if(direction == 1) {
+			tf.setText(" Floor: "+floor+"  UP ");
+		}
+		else {
+			tf.setText(" Floor: "+floor+"  DOWN ");
+		}
+		}
+		if(Color.RED.equals(this.fButton[floor-1].getBackground())) {
+			this.fButton[floor-1].setBackground(Color.WHITE);
+			tf.setText(" Floor: "+floor+"  STOP ");
 		}
 		
-		elevatorNumber = elevNum;
-		door = false;
-		topFloor = floors;
-		motor = 0;
-		currentFloor = 1;
-		serviceQueue = new ArrayList<Integer>();
-		elevLamp = new ArrayList<Integer>(); 	
-		myPort = port;
-		jam = false; 						
-		functioning = true; 
-		passenger = false; 
-		try {
-			sendSocket = new DatagramSocket(myPort);
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		gui = new Elev_Gui(this.elevatorNumber,floors,this);
-
-		this.sendRequest(currentFloor, motor);
-
-	}
-
-	public void addRequest(int initial, int dummy) {
-		synchronized(this) {
-			this.serviceQueue.add(initial);
-			//this.serviceQueue.add(desination);
-			if (motor==1) {
-				System.out.print("E"+ this.elevatorNumber+ " queue: ");
-				Collections.sort(serviceQueue); // sorts list from smallest to largest
-				for(Integer i: this.serviceQueue) System.out.print(i+" ");
-	
-			} else if (motor==2){
-				System.out.print("E"+ this.elevatorNumber+ " queue: ");
-				Collections.sort(serviceQueue);
-				Collections.reverse(serviceQueue); // sorts list from largest to smallest
-				for(Integer i: this.serviceQueue) System.out.print(i+" ");
-	
-			}
-			elevLamp = serviceQueue;  //the lamp displays all floors to be visited
-			
-			//display lamp 								
-			String temp ="";							
-			for(Integer i: elevLamp) {					
-				temp +=" "+i;							
-			}											
-			//System.out.println("Elevator " +this.elevatorNumber + " visiting:"+ temp + "\n"); 
-			
-			
-			requestWaiting=false;
-			notifyAll();
-		}
-	}
-
-	public void service()throws InterruptedException { // moves the elevator through queue to service requests
-		while(true) {
-			synchronized(this) {
-				while(requestWaiting || this.serviceQueue.isEmpty() )
-				{
-					wait();
-				}
-				if(functioning && !door) {
-				//System.out.println("^^^^^^^Elevator " + this.elevatorNumber + "^^^^^^");
-				if (this.currentFloor == this.serviceQueue.get(0)) {
-					this.serviceQueue.remove(0);
-					elevLamp = this.serviceQueue;
-					if(this.serviceQueue.isEmpty()) this.motor=0;
-					this.sendRequest(this.currentFloor, this.motor);
-					System.out.println("\n****Elevator" +this.elevatorNumber + " at Des: "+ this.currentFloor+"****\n");
-					
-					//display lamp 								
-					String temp ="";							
-					for(Integer i: elevLamp) {					
-						temp +=" "+i;							
-					}											
-					//System.out.println("Elevator " +this.elevatorNumber + " visiting:"+ temp + "\n"); 
-					
-					this.open_Close();   					
-					Thread.sleep(3000);
-		//			this.displayButtons();      
-					this.open_Close();						
-				} else if (this.serviceQueue.get(0) > this.currentFloor) {
-					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
-					this.currentFloor++;
-					this.motor = 1;
-					this.gui.move(this.currentFloor, this.motor);
-					this.sendRequest(this.currentFloor, this.motor);
-					Thread.sleep(1000);
-				} else if(this.serviceQueue.get(0) < this.currentFloor){
-					System.out.println("E"+ this.elevatorNumber+" going down, current floor: " + currentFloor+"\n");
-					this.currentFloor--;
-					this.motor = 2;
-					this.gui.move(this.currentFloor, this.motor);
-					this.sendRequest(this.currentFloor, this.motor);
-					Thread.sleep(1000);
-				}
-			}
-			}
-		}
-
 	}
 	
-	public int getCurrentFLoor() {			
-		return this.currentFloor;
-	}
-	public int getDirection() {
-		return this.motor;
-	}
-	
-	
-	public void open_Close() {                                           
-		if(door) {   //if door open
-			System.out.println("Elevator "+ this.elevatorNumber + " closing doors\n");
-			
-			if(jam) {
-				this.sendRequest(this.currentFloor, 4);
-			
-			while(jam == true) {
-				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....\n");
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} 
-				System.out.println("Elevator "+ this.elevatorNumber + "Jam Fixed");
-				jam=false;
-				System.out.println("Elevator "+ this.elevatorNumber + "closing doors\n");
-						
+
+	private void createGui(int floors, int elevNum) {
+		JFrame f=new JFrame("Elevator"+elevNum);  
+	    tf=new JTextField(" Floor: "+elevator.getCurrentFLoor()+" Stop "); 
+	    Font font = new Font("SansSerif", Font.BOLD, 20);
+	    tf.setFont(font);
+	    tf.setHorizontalAlignment(JTextField.CENTER);
+	    tf.setBounds(150,350,200,65);  
+	    
+	    //set up floor markers
+	    String F;
+	    int x = 10; int y = 10;
+	    for(int i=floors-1;i>=0;i--) {
+	    	F = " "+(i+1)+" ";
+	    	floor[i]=new JButton(F);
+	    	floor[i].setBounds(x,y,75,35);
+	    	floor[i].setBackground(Color.WHITE);
+	    	y+=35;
+	    	f.add(floor[i]);
+	    	
+	    }
+	    
+	    //set up floor buttons
+	    
+	    ActionListener listener = new ActionListener() {
+			@Override
+			public void actionPerformed(java.awt.event.ActionEvent arg0) {
+				if (arg0.getSource() instanceof JButton) {
+	                String text = ((JButton) arg0.getSource()).getText();
+	               
+	                ((JButton) arg0.getSource()).setBackground(Color.RED);
+	                String request = ((JButton) arg0.getSource()).getText();
+	                int r = Integer.parseInt(request);
+	                elevator.addRequest(r, elevator.getCurrentFLoor());
+	            }
 			}
-			this.sendRequest(this.currentFloor, 4);
-			}
-			door = false; //close door
-		}
-		else {  //if door closed
-			System.out.println("Elevator "+ this.elevatorNumber + " Opening doors\n");
-			if(jam) {
-				this.sendRequest(this.currentFloor, 4);
-			while(jam == true) {
-				System.out.println("Elevator "+ this.elevatorNumber + " Door jamed\nFixing Jam....\n");
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} 
-				System.out.println("Elevator "+ this.elevatorNumber + "Jam Fixed");
-				jam=false;
-				System.out.println("Elevator "+ this.elevatorNumber + " Opening doors\n");						
-			}
-			this.sendRequest(this.currentFloor, 4);
-			}
-			door = true; //close door
-		}
-	}		
+	    };
+	    
+	     x = 90;  y = 480;
+	     int count = 0;
+	    for(int i=0;i<floors;i++) {
+	    	F = ""+(i+1)+"";
+	    	fButton[i]=new JButton(F); 
+	    
+	    	if(count == 5) {
+	    		count = 0;
+	    		x = 90; y+=60;
+	    	}
+	    	fButton[i].setBounds(x,y,60,60);
+	    	count++;
+	    	x+=60;
+	    	fButton[i].addActionListener(listener);
+	    	fButton[i].setBackground(Color.WHITE);
+	    	f.add(fButton[i]);
+	    	
+	    }
+	    
+	    
+/*	    JButton b=new JButton("Click Here");  
+	    b.setBounds(90,250,100,100);  
+	    b.addActionListener(new ActionListener(){  
+	    	@Override
+	    	public void actionPerformed(java.awt.event.ActionEvent arg0) {
+	    		// TODO Auto-generated method stub
+	    		tf.setText("");
+	    		
+	   // 		move(8,0);
+	    		
+	    		
+	    	}  
+	    	});  
+	    f.add(b);f.add(tf);  
+	    f.setSize(500,1000);  
+	    f.setLayout(null);  
+	    f.setVisible(true);   
+	*/ 
 
-	
-	  public void displayButtons() { //will display buttons for gui, but act as 
-		 // stud for new passengers boarding //display button as gui
-	  
-		  if(this.passenger == false) { //if there wasnt a passenger, a new one boarded
-			  Random rand = new Random(); int next = rand.nextInt(topFloor) + 1;
-			  this.addRequest(next,0); passenger = true; 
-			  if(next > currentFloor) {
-				  this.sendRequest(currentFloor, 1); //going up 
-				  } else {
-				  this.sendRequest(currentFloor, 2); //going down 
-				  } 
-			  System.out.println("\n\n\n Elevator "+ this.elevatorNumber + " adding "+ next + "\n\n\n");
-			  } else { passenger = false;
-	  //if there was a passenger, then they got off 
-			  } 
-		  
-		  }
-	 
-
-	public void sendRequest(int currFloor, int direction) { // send new internal requests to the scheduler data->
-															// ID,direction,floor,floor
-
-		byte data[] = new byte[4];
-		data[0] = (byte) elevatorNumber;
-		data[1] = (byte) direction;
-		if (currFloor >= 10) {
-			data[2] = (byte) 1;
-			data[3] = (byte) (currFloor - 10);
-		} else {
-			data[2] = (byte) 0;
-			data[3] = (byte) currFloor;
-		}
-
-		//System.out.println("Sending packet containing: " + data.toString());
-		try {
-			DatagramPacket sendPacket = new DatagramPacket(data, data.length, InetAddress.getLocalHost(),
-					SEND_PORT_NUMBER);
-			sendSocket.send(sendPacket);
-		} catch (SocketException se) { // Can't create the socket.
-			sendSocket.close();
-			se.printStackTrace();
-			System.exit(1);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		//System.out.println("Packet sent to Scheduler");
-	}
-	
-	public void run() {
-		try {
-			this.service();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-
+  }
+ 
 }
