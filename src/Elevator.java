@@ -53,7 +53,11 @@ public class Elevator {
 		// decode packet and get data and run proper elev
 		byte[] temp = receivePacket.getData();
 		int initial, destination;
-		if (temp[2] >= 10) {
+		
+		if(temp[2]>=20) {
+			initial = temp[3] + 20;
+		}
+		else if (temp[2] >= 10) {
 			initial = temp[3] + 10;
 		} else {
 			initial = temp[3];
