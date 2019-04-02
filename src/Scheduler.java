@@ -145,6 +145,7 @@ public class Scheduler {
 		updateDate();
 		int toFloor = 0;
 		byte data[] = new byte[PACKETSIZE];
+		byte msg[] = new byte[PACKETSIZE];
 		receivePacket = new DatagramPacket(data, data.length);
 		System.out.println("Scheduler: Waiting for Packet.\n");
 
@@ -258,6 +259,7 @@ public class Scheduler {
 				}
 				elevatorState1 = data[1];
 				elevatorFloor1 = currFloor;
+				
 				System.out.println("\n Updating E4: "+ elevatorState4+ ", "+elevatorFloor4+ "\n");
 				if(elevatorState1 == 4)
 					System.out.println("Elevator4 Jammed::: ERROR");
@@ -266,11 +268,23 @@ public class Scheduler {
 			if(data[1]==0 && measuring) {
 				arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 			}
+			msg[0] = data[0];
+			msg[1] = data[1];
+			msg[2] = data[2];
+			sendPacket = new DatagramPacket(msg, msg.length,
+					receivePacket.getAddress(), FLOORPORT);
+			try {
+				sendSocket.send(sendPacket);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
 		}
 		else { //1 is arbitrary (from client/Button)
 			long start = System.nanoTime();
 			System.out.println("received from floor");
-			byte msg[] = new byte[PACKETSIZE];
+			
 			int direction = data[0];
 			
 			msg[1] = (byte)direction; //direction
@@ -301,18 +315,10 @@ public class Scheduler {
 			System.out.println(this.receivePacket.getData() + "\n");
 			// or (as we should be sending back the same thing)
 			// System.out.println(received);
-			long end = System.nanoTime();
-			q2[counter2] = end - start;
-			if(counter2 == 10) {
-				long temp = 0;
-				for(int i = 0; i< 10; i++) {
-					temp = temp + q2[i];
-				}
-				System.out.println("Mean of last 10 Button updates is: " + temp/10/1000000 + "ms");
-			}
+			//System.out.println("Mean of last 10 Button updates is: " + temp/10/1000000 + "ms");			}
 		}
-			
 	}
+	
 	
 
 
