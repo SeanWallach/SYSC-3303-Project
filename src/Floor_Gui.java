@@ -45,9 +45,9 @@ public class Floor_Gui {
 	                	BB.setBackground(Color.RED);
 	                }
 	  
-	            }
+	            } 
 			}
-	    };
+	    }; 
 		
 		
 		
@@ -55,7 +55,7 @@ public class Floor_Gui {
 		int count=0;
 		x = 0;
 		y = 10;
-		for(int i=floors;i>=0;i--) {
+		for(int i=floors;i>0;i--) {
 			
 			JButton wall = new JButton(); //wall that separates buttons 
 			wall.setBounds(x,y,350,10);
@@ -68,20 +68,24 @@ public class Floor_Gui {
 			tf.setBounds(x+10,y+15,150,35);
 			f.add(tf);
 			
-			up[i] = new JButton("UP");
-			up[i].setBounds(x+250, y+15, 75,25);
-			up[i].setBackground(Color.WHITE);
-			up[i].setActionCommand(""+i);
-			up[i].addActionListener(listener);
-			f.add(up[i]);
-			
-			down[i] = new JButton("DOWN");
-			down[i].setBounds(x+250, y+40, 75,25);
-			down[i].setBackground(Color.WHITE);
-			down[i].setActionCommand(""+i);
-			down[i].addActionListener(listener);
-			f.add(down[i]);
-			
+			if(i==22) {}
+			else {
+			up[i-1] = new JButton("UP");
+			up[i-1].setBounds(x+250, y+15, 75,25);
+			up[i-1].setBackground(Color.WHITE);
+			up[i-1].setActionCommand(""+i);
+			up[i-1].addActionListener(listener);
+			f.add(up[i-1]);
+			}
+			if(i==1) {}
+			else {
+			down[i-1] = new JButton("DOWN");
+			down[i-1].setBounds(x+250, y+40, 75,25);
+			down[i-1].setBackground(Color.WHITE);
+			down[i-1].setActionCommand(""+i);
+			down[i-1].addActionListener(listener);
+			f.add(down[i-1]);
+			}
 			count++;
 			y+=75;
 			if(count==12) {
