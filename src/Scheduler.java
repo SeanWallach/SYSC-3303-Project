@@ -39,10 +39,10 @@ public class Scheduler {
 		elevatorState4 = 0; elevatorFloor4 = 0;//all elevators should be idle at startup
 		q1 = new long[10];
 		q2 = new long[10];
-		t1 = new Thread(new FaultScheduler(this, 1));
-		t2 = new Thread(new FaultScheduler(this, 2));
-		t3 = new Thread(new FaultScheduler(this, 3));
-		t4 = new Thread(new FaultScheduler(this, 4));
+		t1 = new Thread(new FaultTimer(this, 1));
+		t2 = new Thread(new FaultTimer(this, 2));
+		t3 = new Thread(new FaultTimer(this, 3));
+		t4 = new Thread(new FaultTimer(this, 4));
 		//t4?? Will fault scheduling be needed?
 		//q = new ConcurrentLinkedQueue();
 		try {
