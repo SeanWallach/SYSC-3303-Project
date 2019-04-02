@@ -333,7 +333,7 @@ public class Scheduler {
 	public static void main( String args[] )
 	{
 		if(measuring) {
-			new MeasurementOutput(a).start(); //run measuring
+			new MeasurementOutput.start(); //run measuring
 		}
 		Scheduler a = new Scheduler();
 		while(true) {
