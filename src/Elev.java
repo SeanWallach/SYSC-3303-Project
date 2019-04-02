@@ -120,7 +120,7 @@ public class Elev extends Thread{
 					
 					this.open_Close();   					
 					Thread.sleep(3000);
-		//			this.displayButtons();      
+		     
 					this.open_Close();						
 				} else if (this.serviceQueue.get(0) > this.currentFloor) {
 					System.out.println("E"+this.elevatorNumber+" going up, current floor: " + currentFloor+ "\n");
@@ -154,7 +154,7 @@ public class Elev extends Thread{
 	public void open_Close() {                                           
 		if(door) {   //if door open
 			System.out.println("Elevator "+ this.elevatorNumber + " closing doors\n");
-			
+			gui.door(false); //close doors on gui
 			if(jam) {
 				this.sendRequest(this.currentFloor, 4);
 			
@@ -177,6 +177,7 @@ public class Elev extends Thread{
 		}
 		else {  //if door closed
 			System.out.println("Elevator "+ this.elevatorNumber + " Opening doors\n");
+			gui.door(true); //open doors on gui
 			if(jam) {
 				this.sendRequest(this.currentFloor, 4);
 			while(jam == true) {
@@ -197,24 +198,6 @@ public class Elev extends Thread{
 		}
 	}		
 
-	
-	  public void displayButtons() { //will display buttons for gui, but act as 
-		 // stud for new passengers boarding //display button as gui
-	  
-		  if(this.passenger == false) { //if there wasnt a passenger, a new one boarded
-			  Random rand = new Random(); int next = rand.nextInt(topFloor) + 1;
-			  this.addRequest(next,0); passenger = true; 
-			  if(next > currentFloor) {
-				  this.sendRequest(currentFloor, 1); //going up 
-				  } else {
-				  this.sendRequest(currentFloor, 2); //going down 
-				  } 
-			  System.out.println("\n\n\n Elevator "+ this.elevatorNumber + " adding "+ next + "\n\n\n");
-			  } else { passenger = false;
-	  //if there was a passenger, then they got off 
-			  } 
-		  
-		  }
 	 
 
 	public void sendRequest(int currFloor, int direction) { // send new internal requests to the scheduler data->
