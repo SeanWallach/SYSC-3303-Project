@@ -27,6 +27,11 @@ public class Scheduler {
 	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, ELEVATORPORT4 = 72,
 			PACKETSIZE = 25, SELFPORT = 219, FLOORPORT = 238;
 
+	public ArrayList<Long> arrivalTimes = new ArrayList<Long>(); 	
+	public ArrayList<Long> floorBTimes = new ArrayList<Long>(); 	
+	private static boolean measuring = true;	
+	private long aStartTime, fStartTime;
+	
 	public Scheduler()
 	{
 		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; 
@@ -47,7 +52,7 @@ public class Scheduler {
 			sendSocket = new DatagramSocket();
 
 			// Construct a datagram socket and bind it to port 23 
-			// on the local host machine. This socket will be used to//
+			// on the local host machine. This socket will be used to
 			// receive UDP Datagram packets from the client
 			receiveSocket = new DatagramSocket(SELFPORT);
 			
@@ -127,7 +132,9 @@ public class Scheduler {
 			e.printStackTrace();
 			System.exit(1);
 		}
-
+		if(measuring) {
+			floorBTimes.add(System.nanoTime() - fStartTime);//packet sent measure elapsed time
+		}
 		System.out.println("Server: packet sent");
 
 	}
@@ -166,7 +173,11 @@ public class Scheduler {
 
 		//decode request and assign toFloor as the floor that will be sent to elevator
 		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3 || fromPort == ELEVATORPORT4) {
-			long start = System.nanoTime();//received from elevator
+			//long start = System.nanoTime();
+			//received from elevator
+			if(measuring&&data[1]==0) {
+				aStartTime = System.nanoTime();
+				}
 			System.out.println("Received from elevator");
 			int elevatorNumber = data[0];
 			int floorDecode = data[2];
@@ -252,21 +263,13 @@ public class Scheduler {
 					System.out.println("Elevator4 Jammed::: ERROR");
 			}	
 
-			long end = System.nanoTime();
-			q1[counter2] = (end - start);
-			counter1++;
-			if(counter1 == 10) {
-				long temp = 0;
-				for(int i = 0; i < 10; i++) {
-					temp = temp + q1[i];
-				}
-				System.out.println("Mean of last 10 elevators sent is: "+ temp/10/1000000 +"ms");
-				counter1 = 0;
+			if(data[1]==0 && measuring) {
+				arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 			}
 		}
 		else { //1 is arbitrary (from client/Button)
 			long start = System.nanoTime();
-			System.out.println("recieved from floor");
+			System.out.println("received from floor");
 			byte msg[] = new byte[PACKETSIZE];
 			int direction = data[0];
 			
@@ -329,6 +332,9 @@ public class Scheduler {
 
 	public static void main( String args[] )
 	{
+		if(measuring) {
+			new MeasurementOutput(a).start(); //run measuring
+		}
 		Scheduler a = new Scheduler();
 		while(true) {
 			a.receiveAndSend();
