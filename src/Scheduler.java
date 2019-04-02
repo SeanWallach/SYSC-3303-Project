@@ -4,34 +4,42 @@
 // UDP/IP. The server receives from a client (elevator button/user) or server (Elevator) a packet 
 // containing a data array with floor and direction, then forwards it to the other client or server.
 // Last edited Feb 9th 2019
-
+import java.io.FileWriter;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
 public class Scheduler {
-
+    //ConcurrentLinkedQueue q;
+    
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendSocket, receiveSocket;
-	Thread t1, t2, t3; //threads for monitoring elevators
+	long[] q1, q2; 
+	Thread t1, t2, t3, t4; //threads for monitoring elevators
 	Date currentDate; 
-	Boolean isActive1 = true, isActive2 = true, isActive3 = true; //To keep track of which elevators are talking to the scheduler
-	int elevatorState1, elevatorState2, elevatorState3, //will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
-		elevatorFloor1, elevatorFloor2, elevatorFloor3; //collections, ArrayList? 
-	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, 
+	Boolean isActive1 = true, isActive2 = true, isActive3 = true, isActive4 = true; //To keep track of which elevators are talking to the scheduler
+	Elevator Uno, Dos, Tres;
+	int elevatorState1, elevatorState2, elevatorState3, elevatorState4,//will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
+		elevatorFloor1, elevatorFloor2, elevatorFloor3, elevatorFloor4,
+		counter1, counter2;//collections, ArrayList? 
+	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, ELEVATORPORT4 = 72,
 			PACKETSIZE = 25, SELFPORT = 219, FLOORPORT = 238;
-	public ArrayList<Long> arrivalTimes = new ArrayList<Long>(); 
-	public ArrayList<Long> floorBTimes = new ArrayList<Long>(); 
-	private static boolean measuring = true;
-	private long aStartTime, fStartTime;
 
 	public Scheduler()
 	{
-		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; elevatorFloor2 = 0; elevatorFloor3 = 0; //all elevators should be idle at startup
-	  t1 = new Thread(new FaultTimer(this, 1));
-
-		t2 = new Thread(new FaultTimer(this, 2));
-		t3 = new Thread(new FaultTimer(this, 3));
+		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; 
+		elevatorFloor2 = 0; elevatorFloor3 = 0; counter1 = 0; counter2 = 0;
+		elevatorState4 = 0; elevatorFloor4 = 0;//all elevators should be idle at startup
+		q1 = new long[10];
+		q2 = new long[10];
+		t1 = new Thread(new FaultScheduler(this, 1));
+		t2 = new Thread(new FaultScheduler(this, 2));
+		t3 = new Thread(new FaultScheduler(this, 3));
+		t4 = new Thread(new FaultScheduler(this, 4));
+		//t4?? Will fault scheduling be needed?
+		//q = new ConcurrentLinkedQueue();
 		try {
 			// Construct a datagram socket and bind it to any available 
 			// port on the local host machine. This socket will be used to
@@ -39,7 +47,7 @@ public class Scheduler {
 			sendSocket = new DatagramSocket();
 
 			// Construct a datagram socket and bind it to port 23 
-			// on the local host machine. This socket will be used to
+			// on the local host machine. This socket will be used to//
 			// receive UDP Datagram packets from the client
 			receiveSocket = new DatagramSocket(SELFPORT);
 			
@@ -52,6 +60,7 @@ public class Scheduler {
 		t1.start();
 		t2.start();
 		t3.start();
+		t4.start();
 	}
 
 	private int getBestElevator(int toFloor, int direction) {
@@ -60,6 +69,8 @@ public class Scheduler {
 		if(elevatorState1 == 0 && isActive1) return 1;
 		if(elevatorState2 == 0 && isActive2) return 2;
 		if(elevatorState3 == 0 && isActive3) return 3;
+		if(elevatorState4 == 0 && isActive4) return 4;
+		
 		
 		//No Elevator idle Check other specs to find best a case
 		
@@ -69,19 +80,22 @@ public class Scheduler {
 			return 2;
 		if((elevatorState3 == 1 && direction == 1 && isActive3) && toFloor >= elevatorFloor3)
 			return 3;
+		if((elevatorState4 == 1 && direction == 1 && isActive4 && toFloor >= elevatorFloor4))
+			return 4;
 		if((elevatorState1 == 2 && direction == 2 && isActive1) && toFloor <= elevatorFloor1)
 			return 1;
 		if((elevatorState2 == 2 && direction == 2 && isActive2) && toFloor <= elevatorFloor2)
 			return 2;
 		if((elevatorState3 == 2 && direction == 2 && isActive3) && toFloor <= elevatorFloor3)
 			return 3;
-		if(!isActive1 && !isActive2 && !isActive3) {
+		if((elevatorState4 == 2 && direction == 2 && isActive4) && toFloor <= elevatorFloor4)
+			return 4;
+		if(!isActive1 && !isActive2 && !isActive3 && !isActive4) {
 			System.out.println("All elevators broken shutting down for maintenance!");
 			shutdownSystem();
 		}
 		//Implementation should prevent any situation where all of these fail; however recall function		
 		return getBestElevator(toFloor, direction);
-
 	}
 
 	private void sendElevator(int elev, int floor, byte msg[]) {
@@ -90,6 +104,9 @@ public class Scheduler {
 		int toPort;
 		//assign proper port
 		switch(elev) {
+		case(4):
+			toPort = ELEVATORPORT4;
+			elevatorState4 = msg[1];
 		case(3):
 			toPort = ELEVATORPORT3;
 			elevatorState3=msg[1];
@@ -101,8 +118,6 @@ public class Scheduler {
 			elevatorState1=msg[1];
 		}
 		
-		//add to floor times
-		
 		sendPacket = new DatagramPacket(msg, msg.length,
 				receivePacket.getAddress(), 68);
 		// Send the datagram packet to the client via the send socket. 
@@ -112,7 +127,7 @@ public class Scheduler {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		if(measuring) floorBTimes.add(System.nanoTime() - fStartTime);//packet send measure elapsed time
+
 		System.out.println("Server: packet sent");
 
 	}
@@ -148,11 +163,10 @@ public class Scheduler {
 		System.out.println("Length: " + len);
 		System.out.print("Containing: " );
 		System.out.println(this.receivePacket.getData());
-		
 
 		//decode request and assign toFloor as the floor that will be sent to elevator
-		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3) { //received from elevator
-			if(measuring&&data[1]==0) {aStartTime = System.nanoTime();}//start time for arrival
+		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3 || fromPort == ELEVATORPORT4) {
+			long start = System.nanoTime();//received from elevator
 			System.out.println("Received from elevator");
 			int elevatorNumber = data[0];
 			int floorDecode = data[2];
@@ -160,8 +174,11 @@ public class Scheduler {
 			if(floorDecode == 0) {
 				currFloor = data[3];
 			}
-			else {
+			else if(floorDecode == 1) {
 				currFloor = data[3] + 10;
+			}
+			else {
+				currFloor = data[3] + 20;
 			}
 			//update the correct elevator
 			if(elevatorNumber==1) {
@@ -171,11 +188,12 @@ public class Scheduler {
 					if(!isActive1) { //door was already jammed elevator reporting its fixed
 						isActive1 = true;
 					}
-					isActive1 = false;
+					else {
+						isActive1 = false;
+					}
 					return;
 				}
 				elevatorState1 = data[1];
-				if(data[1]==0 && measuring) arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 				elevatorFloor1 = currFloor;
 				System.out.println("\n Updating E1: "+ elevatorState1+ ", "+elevatorFloor1+ "\n");
 				if(elevatorState1 == 4)
@@ -187,11 +205,12 @@ public class Scheduler {
 					if(!isActive2) { //door was already jammed elevator reporting its fixed
 						isActive2 = true;
 					}
-					isActive2 = false;
+					else {
+						isActive2 = false;
+					}
 					return;
 				}
 				elevatorState2 = data[1];
-				if(data[1]==0 && measuring) arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 				elevatorFloor2 = currFloor;
 				System.out.println("\n Updating E2: "+ elevatorState2+ ", "+elevatorFloor2+ "\n");
 				if(elevatorState2 == 4)
@@ -203,24 +222,50 @@ public class Scheduler {
 					if(!isActive3) { //door was already jammed elevator reporting its fixed
 						isActive3 = true;
 					}
-					isActive3 = false;
+					else {
+						isActive3 = false;
+					}
 					return;
 				}
 				elevatorState3 = data[1];
-				if(data[1]==0 && measuring) arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 				elevatorFloor3 = currFloor;
 				System.out.println("\n Updating E3: "+ elevatorState3+ ", "+elevatorFloor3+ "\n");
 				if(elevatorState3 == 4)
 					System.out.println("Elevator3 Jammed::: ERROR");
 			}
-			
-			
-			
+			else if(elevatorNumber==4) {
+				//direction: 0 = stop; 1 = up; 2 = down
+				if(data[1] == 4) {
+					System.out.println("Elevator Door Jammed Waiting for Fix");
+					if(!isActive4) { //door was already jammed elevator reporting its fixed
+						isActive4 = true;
+					}
+					else{
+						isActive4 = false;
+					}
+					return;
+				}
+				elevatorState1 = data[1];
+				elevatorFloor1 = currFloor;
+				System.out.println("\n Updating E4: "+ elevatorState4+ ", "+elevatorFloor4+ "\n");
+				if(elevatorState1 == 4)
+					System.out.println("Elevator4 Jammed::: ERROR");
+			}	
 
-
+			long end = System.nanoTime();
+			q1[counter2] = (end - start);
+			counter1++;
+			if(counter1 == 10) {
+				long temp = 0;
+				for(int i = 0; i < 10; i++) {
+					temp = temp + q1[i];
+				}
+				System.out.println("Mean of last 10 elevators sent is: "+ temp/10/1000000 +"ms");
+				counter1 = 0;
+			}
 		}
 		else { //1 is arbitrary (from client/Button)
-			if(measuring) fStartTime = System.nanoTime();//start for arrival time
+			long start = System.nanoTime();
 			System.out.println("recieved from floor");
 			byte msg[] = new byte[PACKETSIZE];
 			int direction = data[0];
@@ -253,22 +298,17 @@ public class Scheduler {
 			System.out.println(this.receivePacket.getData() + "\n");
 			// or (as we should be sending back the same thing)
 			// System.out.println(received);
+			long end = System.nanoTime();
+			q2[counter2] = end - start;
+			if(counter2 == 10) {
+				long temp = 0;
+				for(int i = 0; i< 10; i++) {
+					temp = temp + q2[i];
+				}
+				System.out.println("Mean of last 10 Button updates is: " + temp/10/1000000 + "ms");
+			}
 		}
-		//decode data packet from elevator and update status bars for elevators
-		
-
-		/* Slow things down (wait 2 seconds)
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e ) {
-			e.printStackTrace();
-			System.exit(1);
-		}*/
-
-
-
-
-		//Identify and get best elevators port for send pack		
+			
 	}
 	
 
@@ -280,19 +320,19 @@ public class Scheduler {
 		t1.stop();
 		t2.stop();
 		t3.stop();
-		
+		t4.stop();
 		System.exit(1);
 	}
 	void updateDate() {
 		currentDate = new Date();
 	}
 
-	public static void main( String args[] ) throws IOException 
+	public static void main( String args[] )
 	{
 		Scheduler a = new Scheduler();
-		if(measuring) new MeasurementOutput(a).start(); //run measuring
 		while(true) {
 			a.receiveAndSend();
 		}
 	}
 }
+
