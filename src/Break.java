@@ -35,17 +35,17 @@ public class Break extends Thread {
 		//Set the functioning to false preventing service from running
 		if (elevNum == 1) {
 			this.elev1.functioning = false;
-			System.out.println("\n\n **** E1 failure ***\n\n");
+			System.out.println("\n\n **** E1 failure - Break ***\n\n");
 		}
 
 		else if (elevNum == 2) {
 			this.elev2.functioning = false;
-			System.out.println("\n\n **** E2 failure ***\n\n");
+			System.out.println("\n\n **** E2 failure - Break  ***\n\n");
 		}
 
 		else {
 			this.elev3.functioning = false;
-			System.out.println("\n\n **** E3 failure ***\n\n");
+			System.out.println("\n\n **** E3 failure - Break***\n\n");
 		}
 		go = false;
 
@@ -80,7 +80,7 @@ public class Break extends Thread {
 			else if (i==0) {//shut down elevator
 
 				try {
-					Thread.sleep(time);
+					Thread.sleep(5000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

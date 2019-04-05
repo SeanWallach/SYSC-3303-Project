@@ -1,11 +1,14 @@
 import java.util.Date;
-public class FaultTimer extends Thread{
+
+public class FaultTimer extends Thread {
 	private Scheduler s;
 	private int preState, preFloor, elevator;
+
 	public FaultTimer(Scheduler s, int elev) {
 		this.s = s;
 		elevator = elev;
 	}
+
 	public void run() {
 		while(true) {
 			//System.out.println("FaultScheduler for elevator " + elevator + " Checking at: " + new Date());
@@ -26,6 +29,7 @@ public class FaultTimer extends Thread{
 					preState = s.elevatorState4;
 					preFloor = s.elevatorFloor4;
 				Thread.sleep(5000);
+				}
 
 				if(elevator == 1) {
 					//System.out.println("ELEVATOR 1: preFloor: " + preFloor + ", State: " + s.elevatorState1 + " current Floor: " + s.elevatorFloor1);
@@ -37,7 +41,7 @@ public class FaultTimer extends Thread{
 					}
 					else {
 					System.out.println("Elevator " + elevator + " appears to be working as expected");
-				}
+					}
 				}
 				else if(elevator == 2) {
 					//System.out.println("ELEVATOR2: preFloor: " + preFloor + ", State: " + s.elevatorState2 + " current Floor: " + s.elevatorFloor2);
@@ -50,7 +54,8 @@ public class FaultTimer extends Thread{
 					}
 					else {
 					System.out.println("Elevator " + elevator + " appears to be working as expected");
-				}
+				
+					}
 				}
 				else if (elevator == 3){ //elevator 3
 					//sSystem.out.println("ELEVATOR 3: preFloor: " + preFloor + ", State: " + s.elevatorState3 + " current Floor: " + s.elevatorFloor3);
@@ -63,7 +68,7 @@ public class FaultTimer extends Thread{
 					}
 					else {
 					System.out.println("Elevator " + elevator + " appears to be working as expected");
-				}
+					}
 					
 				}
 				if(elevator == 4) {
@@ -76,13 +81,15 @@ public class FaultTimer extends Thread{
 					}
 					else {
 					System.out.println("Elevator " + elevator + " appears to be working as expected");
-				}
+					}
 				}	
 				
 				//So elevator is attached @ creation... checks elevator state which better update if it returns as fault 
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		
+			
 		}
 	}
 }
