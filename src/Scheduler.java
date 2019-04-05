@@ -268,7 +268,7 @@ public class Scheduler {
 				arrivalTimes.add(System.nanoTime()-aStartTime);//end time for arrival
 			}
 			msg[0] = data[0];
-			msg[1] = data[1];
+			msg[1] = data[2];/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			msg[2] = data[3];///////////////////////////////////////////
 			sendPacket = new DatagramPacket(msg, msg.length,
 					receivePacket.getAddress(), FLOORPORT);
