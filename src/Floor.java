@@ -20,19 +20,24 @@ public class Floor {
 	static String temp;
 	static List<String> allLines;       // input file content
 	
+	
 	Floor_Gui gui;
 	
 	
 	int elevatorDirection; 		// 0 is stop, 1 up, 2 down
 	int numOfFloors;
-	ArrayList<Integer> request;
-	
+	private int[] request;
+	private int index;
+	private boolean requestWaiting;
+	private boolean verify;
 	// Constructor with custom floor level
 	public Floor(int floor, int port) {
-		request = new ArrayList<Integer>();
+		request = new int[floor*2];
 		numOfFloors = floor;
 		gui = new Floor_Gui(floor,this);
-		
+		this.requestWaiting = false;
+	    verify = false;
+		index = -1;
 	   try {
 	      // Construct a datagram socket and bind it to any available port on the local host machine
 	      sendReceiveSocket = new DatagramSocket(port);
@@ -47,8 +52,15 @@ public class Floor {
 	
 	
 	public void sendInstructions(int floor, int direction) {
+		 
+		this.requestWaiting = true;
+		while(verify) {}
+		index++;
+		request[index] = floor;
+		requestWaiting = false;
+		 
 		
-		 this.request.add(floor);
+		
 		 byte msg[] = new byte[5];	// Bit 0 - Direction 	Bit 1,2 - destination Floor   
 		 msg[0] = (byte)direction;
 		 if(floor>=20) {
@@ -83,15 +95,27 @@ public class Floor {
 	}
 
 	public void verify(int floor) {
-		int count=0;
-		System.out.println("verify: "+floor);
-		for(int fl: this.request) {
-			if(floor==fl) {
-				this.request.remove(count);
+		int i =0;
+		
+		while(!requestWaiting && i<=index) {
+			if(request[i]==floor) {
+				gui.clearButton(floor);
+				request[i]=0;
+				index--;
 			}
-			count++;
+			
+			i++;
 		}
-		this.receiveMessage();
+		if(i<index) {
+			verify(floor);
+		}
+		else {
+			this.receiveMessage();
+		}
+		
+		
+		
+		
 	}
 	
 	// For iteration 5
@@ -116,7 +140,7 @@ public class Floor {
 			} else {
 				eleFloor = temp[2];
 			}
-		 	System.out.print(eleFloor);
+		 	System.out.print("received"+eleFloor);
 		this.verify(eleFloor);///////////////////////////////////////////////////
 		 
 		 System.out.print("Received content containing: ");
