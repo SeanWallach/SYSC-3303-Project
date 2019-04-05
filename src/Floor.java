@@ -1,157 +1,122 @@
-//This class is the floor for the project
-//Last edited 3/23/2019
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.event.ActionListener;
 
-import java.io.*;
-import java.net.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JTextField;
 
+public class Floor_Gui {
 
-public class Floor {
-	DatagramPacket sendPacket, receivePacket;
-	DatagramSocket sendReceiveSocket;
 	
-	static String fileName = ".//input.txt";
+	private int x;
+	private int y;
 	
-	static int SCHEDULER_PORT = 219, SELFPORT = 238;
-	static String temp;
-	static List<String> allLines;       // input file content
+	private Floor F;
+	private JButton up[];
+	private JButton down[];
 	
-	
-	Floor_Gui gui;
-	
-	
-	int elevatorDirection; 		// 0 is stop, 1 up, 2 down
-	int numOfFloors;
-	private int[] request;
-	private int index;
-	private boolean requestWaiting;
-	private boolean verify;
-	// Constructor with custom floor level
-	public Floor(int floor, int port) {
-		request = new int[floor*2];
-		numOfFloors = floor;
-		gui = new Floor_Gui(floor,this);
-		this.requestWaiting = false;
-	    verify = false;
-		index = -1;
-	   try {
-	      // Construct a datagram socket and bind it to any available port on the local host machine
-	      sendReceiveSocket = new DatagramSocket(port);
-	      
-	   } catch (SocketException se) {   // Can't create the socket.
-	      se.printStackTrace();
-	      System.exit(1);
-	   }
-	   
-	   this.receiveMessage();
-	}
-	
-	
-	public void sendInstructions(int floor, int direction) {
-		 
-		this.requestWaiting = true;
-		while(verify) {}
-		index++;
-		request[index] = floor;
-		requestWaiting = false;
-		 
+	public Floor_Gui(int floors,Floor floor) {
 		
-		
-		 byte msg[] = new byte[5];	// Bit 0 - Direction 	Bit 1,2 - destination Floor   
-		 msg[0] = (byte)direction;
-		 if(floor>=20) {
-			 msg[1]=2;
-			 msg[2] = (byte)(floor-20);
-		 }
-		 else if(floor>=10) {
-			 msg[1]=1;
-			 msg[2] = (byte)(floor-10);
-		 }
-		 else {
-			 msg[1]=0;
-			 msg[2] = (byte)floor;
-		 }
-		msg[3] =0;
-		msg[4] =0;
-		 System.out.print(msg[0]+" "+msg[1]+" "+msg[2]+"\n");
-		 try {
-		    sendPacket = new DatagramPacket(msg, msg.length,InetAddress.getLocalHost(), SCHEDULER_PORT);
-		    sendReceiveSocket.send(sendPacket);
-		 } catch (IOException e) {
-		    e.printStackTrace();
-		    System.exit(1);
-		 }
+		JFrame f=new JFrame("Floor");  
+		F = floor;
 
-		 System.out.print("Contents sent: " );
-		 for (int i = 0; i < msg.length; i++) {	// Printing Byte array contents
-		    System.out.print(msg[i]);
-		 }
-		 System.out.println("\nElevator request sent.\n");
-		 
-	}
-
-	public void verify(int floor) {
-		int i =0;
+		Font font = new Font("SansSerif", Font.BOLD, 20);
 		
-		while(!requestWaiting && i<=index) {
-			if(request[i]==floor) {
-				gui.clearButton(floor);
-				request[i]=0;
-				index--;
+		up = new JButton[floors];
+		down = new JButton[floors];
+		
+		ActionListener listener = new ActionListener() { //the floor button action when pressed 
+			@Override
+			public void actionPerformed(java.awt.event.ActionEvent arg0) {
+				if (arg0.getSource() instanceof JButton) {
+					JButton BB = ((JButton) arg0.getSource());
+	                String text = BB.getActionCommand();
+	                BB.setBackground(Color.RED);
+	                int request = Integer.parseInt(text);
+	                if(BB.getText().equals("UP")) {
+	                	//send elevator floor num up
+	                	F.sendInstructions(request, 1);
+	                	BB.setBackground(Color.RED);
+	                	
+	                }
+	                else {
+	                	//send elevator floor num down
+	                	F.sendInstructions(request, 2);
+	                	BB.setBackground(Color.RED);
+	                }
+	                BB.setEnabled(false);
+	  
+	            } 
 			}
+	    }; 
+		
+		
+		
+		
+		int count=0;
+		x = 0;
+		y = 10;
+		for(int i=floors;i>0;i--) {
 			
-			i++;
+			JButton wall = new JButton(); //wall that separates buttons 
+			wall.setBounds(x,y,350,10);
+		    wall.setBackground(Color.GRAY);
+		    f.add(wall);
+			
+			JTextField tf=new JTextField("Leve "+i);
+			tf.setFont(font);
+			tf.setHorizontalAlignment(JTextField.CENTER);
+			tf.setBounds(x+10,y+15,150,35);
+			f.add(tf);
+			
+			if(i==22) {}
+			else {
+			up[i-1] = new JButton("UP");
+			up[i-1].setBounds(x+250, y+15, 75,25);
+			up[i-1].setBackground(Color.WHITE);
+			up[i-1].setActionCommand(""+i);
+			up[i-1].addActionListener(listener);
+			f.add(up[i-1]);
+			}
+			if(i==1) {}
+			else {
+			down[i-1] = new JButton("DOWN");
+			down[i-1].setBounds(x+250, y+40, 75,25);
+			down[i-1].setBackground(Color.WHITE);
+			down[i-1].setActionCommand(""+i);
+			down[i-1].addActionListener(listener);
+			f.add(down[i-1]);
+			}
+			count++;
+			y+=75;
+			if(count==12) {
+				y=10;
+				JButton swall = new JButton(); //wall that separates buttons 
+				swall.setBounds(340,y,10,1000);
+			    swall.setBackground(Color.GRAY);
+			    f.add(swall);
+				x+=350;
+				count = 0;
+			}
 		}
-		if(i<index) {
-			verify(floor);
-		}
-		else {
-			this.receiveMessage();
-		}
-		
-		
-		
-		
+
+	    
+	    
+	    f.setSize(700,1000);  
+	    f.setLayout(null);  
+	    f.setVisible(true);   
 	}
 	
-	// For iteration 5
-	public void receiveMessage() {
-		// Now receiving
-		 byte temp[] = new byte[3];
-		 receivePacket = new DatagramPacket(temp, temp.length);
-		 try {
-		    // Block until a datagram is received via sendReceiveSocket.  
-		    sendReceiveSocket.receive(receivePacket);
-		 } catch(IOException e) {
-		    e.printStackTrace();
-		    System.exit(1);
-		 }
-		 System.out.print(temp[0]+" "+temp[1]+" "+temp[2]+"\n");
-		 int eleFloor = 0;
-		 	if(temp[1]>=2) {
-		 		eleFloor = temp[2] + 20;
-			}
-			else if (temp[1] >= 1) {
-				eleFloor = temp[2] + 10;
-			} else {
-				eleFloor = temp[2];
-			}
-		 	System.out.print("received"+eleFloor);
-		this.verify(eleFloor);///////////////////////////////////////////////////
-		 
-		 System.out.print("Received content containing: ");
-		 // Form a String from the byte array.
-		 String received = new String(temp,0,receivePacket.getLength());   
-		 System.out.println(received);
+	public void clearButton(int floor) {
+		up[floor-1].setBackground(Color.WHITE);
+		down[floor-1].setBackground(Color.WHITE);
+		up[floor-1].setEnabled(true);
+		down[floor-1].setEnabled(true);
 	}
+	public static void main(String[] args) {
+		//Floor_Gui fg = new Floor_Gui(22);
+		
+	} 
 	
-	public static void main(String args[])
-	{
-	   Floor Floors = new Floor(22,SELFPORT);
-	   
-	}
 }
