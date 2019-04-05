@@ -26,16 +26,17 @@ public class Floor {
 	
 	int elevatorDirection; 		// 0 is stop, 1 up, 2 down
 	int numOfFloors;
-	private int[] request;
+	//private int[] request;
+	private ArrayList<Integer> request = new ArrayList<Integer>();
 	private int index;
-	private boolean requestWaiting;
+	//private boolean requestWaiting;
 
 	// Constructor with custom floor level
 	public Floor(int floor, int port) {
-		request = new int[floor*2];
+		//request = new int[floor*2];
 		numOfFloors = floor;
 		gui = new Floor_Gui(floor,this);
-		this.requestWaiting = false;
+		//this.requestWaiting = false;
 		index = -1;
 	   try {
 	      // Construct a datagram socket and bind it to any available port on the local host machine
@@ -52,10 +53,10 @@ public class Floor {
 	
 	public void sendInstructions(int floor, int direction) {
 		 
-		this.requestWaiting = true;
+		//this.requestWaiting = true;
 		index++;
-		request[index] = floor;
-		requestWaiting = false;
+		request.add(floor);
+		//requestWaiting = false;
 		 
 		
 		
@@ -95,10 +96,10 @@ public class Floor {
 	public void verify(int floor) {
 		int i =0;
 		//System.out.println("VERIFY: "+ requestWaiting + ", Floor: " + floor +  "index: "+ index + ", i:" + i);
-		while(!requestWaiting && i<=index) {
-			if(request[i]==floor) {
+		while(request.size()!=0 && i<=index) {
+			if(request.get(i)==floor) {
 				gui.clearButton(floor);
-				request[i]=0;
+				request.remove(i);
 				index--;
 			}
 			
