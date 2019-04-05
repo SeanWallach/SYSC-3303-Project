@@ -38,12 +38,14 @@ public class Floor_Gui {
 	                	//send elevator floor num up
 	                	F.sendInstructions(request, 1);
 	                	BB.setBackground(Color.RED);
+	                	
 	                }
 	                else {
 	                	//send elevator floor num down
 	                	F.sendInstructions(request, 2);
 	                	BB.setBackground(Color.RED);
 	                }
+	                BB.setEnabled(false);
 	  
 	            } 
 			}
@@ -109,6 +111,8 @@ public class Floor_Gui {
 	public void clearButton(int floor) {
 		up[floor-1].setBackground(Color.WHITE);
 		down[floor-1].setBackground(Color.WHITE);
+		up[floor-1].setEnabled(true);
+		down[floor-1].setEnabled(true);
 	}
 	public static void main(String[] args) {
 		//Floor_Gui fg = new Floor_Gui(22);
