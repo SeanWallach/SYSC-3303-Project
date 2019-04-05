@@ -104,13 +104,13 @@ public class Elev extends Thread{
 				}
 				if(functioning && !door) {
 				//System.out.println("^^^^^^^Elevator " + this.elevatorNumber + "^^^^^^");
-				if (this.currentFloor == this.serviceQueue.get(0)) {
+				if (this.currentFloor == this.serviceQueue.get(0)) {//destination
 					this.serviceQueue.remove(0);
 					elevLamp = this.serviceQueue;
 					if(this.serviceQueue.isEmpty()) this.motor=0;
 					this.sendRequest(this.currentFloor, this.motor);
 					System.out.println("\n****Elevator" +this.elevatorNumber + " at Des: "+ this.currentFloor+"****\n");
-					
+					this.gui.resetFButton(this.currentFloor);
 					//display lamp 								
 					String temp ="";							
 					for(Integer i: elevLamp) {					

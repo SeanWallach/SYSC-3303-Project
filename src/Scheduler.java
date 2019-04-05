@@ -5,7 +5,6 @@
 // containing a data array with floor and direction, then forwards it to the other client or server.
 // Last edited Feb 9th 2019
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -40,11 +39,11 @@ public class Scheduler {
 		t2 = new Thread(new FaultTimer(this, 2));
 		t3 = new Thread(new FaultTimer(this, 3));
 		t4 = new Thread(new FaultTimer(this, 4));
-		try {
+		/*try {
 			measure  = new MeasurementOutput(this);
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 		//t4?? Will fault scheduling be needed?
 		//q = new ConcurrentLinkedQueue();
 		try {
@@ -69,7 +68,7 @@ public class Scheduler {
 		t2.start();
 		t3.start();
 		t4.start();
-		measure.start(); //run measuring
+		//measure.start(); //run measuring
 	}
 
 	private int getBestElevator(int toFloor, int direction) {
@@ -259,19 +258,21 @@ public class Scheduler {
 					}
 					return;
 				}
-				elevatorState1 = data[1];
-				elevatorFloor1 = currFloor;
+				elevatorState4 = data[1];
+				elevatorFloor4 = currFloor;
 				
 				System.out.println("\n Updating E4: "+ elevatorState4+ ", "+elevatorFloor4+ "\n");
 				if(elevatorState1 == 4)
 					System.out.println("Elevator4 Jammed::: ERROR");
 			}	
 
-			
+			//Sending packet to floor
 			msg[0] = data[0];
-			msg[1] = data[1];
-			msg[2] = data[2];
-			if(data[1] == 0) {
+			msg[1] = data[2];
+			msg[2] = data[3];
+			System.out.println("");
+			if(data[1] == 0) {//only send if elevator arrived
+				
 				sendPacket = new DatagramPacket(msg, msg.length,
 						receivePacket.getAddress(), FLOORPORT);
 				try {

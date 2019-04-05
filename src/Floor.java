@@ -29,14 +29,13 @@ public class Floor {
 	private int[] request;
 	private int index;
 	private boolean requestWaiting;
-	private boolean verify;
+
 	// Constructor with custom floor level
 	public Floor(int floor, int port) {
 		request = new int[floor*2];
 		numOfFloors = floor;
 		gui = new Floor_Gui(floor,this);
 		this.requestWaiting = false;
-	    verify = false;
 		index = -1;
 	   try {
 	      // Construct a datagram socket and bind it to any available port on the local host machine
@@ -54,7 +53,6 @@ public class Floor {
 	public void sendInstructions(int floor, int direction) {
 		 
 		this.requestWaiting = true;
-		while(verify) {}
 		index++;
 		request[index] = floor;
 		requestWaiting = false;
@@ -96,7 +94,7 @@ public class Floor {
 
 	public void verify(int floor) {
 		int i =0;
-		
+		//System.out.println("VERIFY: "+ requestWaiting + ", Floor: " + floor +  "index: "+ index + ", i:" + i);
 		while(!requestWaiting && i<=index) {
 			if(request[i]==floor) {
 				gui.clearButton(floor);
@@ -112,9 +110,6 @@ public class Floor {
 		else {
 			this.receiveMessage();
 		}
-		
-		
-		
 		
 	}
 	
@@ -132,16 +127,17 @@ public class Floor {
 		 }
 		 System.out.print(temp[0]+" "+temp[1]+" "+temp[2]+"\n");
 		 int eleFloor = 0;
-		 	if(temp[1]>=2) {
+		 	if(temp[1]==2) {
 		 		eleFloor = temp[2] + 20;
 			}
-			else if (temp[1] >= 1) {
+			else if (temp[1] == 1) {
 				eleFloor = temp[2] + 10;
 			} else {
 				eleFloor = temp[2];
 			}
-		 	System.out.print("received"+eleFloor);
+		 System.out.println("received: Floor"+eleFloor);
 		this.verify(eleFloor);///////////////////////////////////////////////////
+		 //gui.clearButton(eleFloor);
 		 
 		 System.out.print("Received content containing: ");
 		 // Form a String from the byte array.

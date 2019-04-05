@@ -30,7 +30,7 @@ public class FaultTimer extends Thread {
 					preFloor = s.elevatorFloor4;
 				
 				}
-				Thread.sleep(5000);
+				Thread.sleep(7000);
 
 				if(elevator == 1) {
 					//System.out.println("ELEVATOR 1: preFloor: " + preFloor + ", State: " + s.elevatorState1 + " current Floor: " + s.elevatorFloor1);
@@ -73,12 +73,12 @@ public class FaultTimer extends Thread {
 					
 				}
 				if(elevator == 4) {
-					//System.out.println("ELEVATOR 1: preFloor: " + preFloor + ", State: " + s.elevatorState1 + " current Floor: " + s.elevatorFloor1);
+					//System.out.println("ELEVATOR 4: preFloor: " + preFloor + ", State: " + s.elevatorState4 + " current Floor: " + s.elevatorFloor4s);
 					if(s.elevatorState4 != 0 &&  preFloor == s.elevatorFloor4) {
 						System.out.println("smt broke");
 						s.elevatorState4 = 3;
 						s.isActive4 = false;
-						System.out.println("^^^ERROR: ELEVATOR 1 BROKEN^^^^");
+						System.out.println("^^^ERROR: ELEVATOR 4 BROKEN^^^^");
 					}
 					else {
 					System.out.println("Elevator " + elevator + " appears to be working as expected");
