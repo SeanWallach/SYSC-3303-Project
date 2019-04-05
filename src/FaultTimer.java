@@ -28,8 +28,9 @@ public class FaultTimer extends Thread {
 				else if(elevator == 4){
 					preState = s.elevatorState4;
 					preFloor = s.elevatorFloor4;
-				Thread.sleep(5000);
+				
 				}
+				Thread.sleep(5000);
 
 				if(elevator == 1) {
 					//System.out.println("ELEVATOR 1: preFloor: " + preFloor + ", State: " + s.elevatorState1 + " current Floor: " + s.elevatorFloor1);
