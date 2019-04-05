@@ -84,7 +84,7 @@ public class Elevator {
 			elev3.requestWaiting=true;
 			elev3.addRequest(initial, destination);
 		} else if (temp[0] == 4) {
-			System.out.println("------Adding to Elevator 3-------");
+			System.out.println("------Adding to Elevator 4-------");
 			elev4.requestWaiting=true;
 			elev4.addRequest(initial, destination);
 		}
