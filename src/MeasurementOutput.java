@@ -6,14 +6,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 @SuppressWarnings("unused")
 public class MeasurementOutput extends Thread{
-	
+	private final int ELEVPERIOD = 100, FLOORPERIOD = 200;
 	private String filename = ".//MeasurementOutput.txt";
 	public Scheduler scheduler;
 	private BufferedWriter writer;
-	private ArrayList<Long> elev1 = new ArrayList<Long>();
-	private ArrayList<Long> elev2 = new ArrayList<Long>();
-	private ArrayList<Long> elev3 = new ArrayList<Long>();
-	private ArrayList<Long> elev4 = new ArrayList<Long>();
+	private ArrayList<Long> elevExe = new ArrayList<Long>();
+	private ArrayList<Long> floorExe = new ArrayList<Long>();
 	int firstP, secondP, thirdP, fourthP; //used to track which elevator process has the highest priority level using Rate Monotonic Analysis
 	public MeasurementOutput(Scheduler s) throws IOException{
 		scheduler = s;
@@ -30,10 +28,9 @@ public class MeasurementOutput extends Thread{
 			e1.printStackTrace();
 		}
 		//protected access to shared memory
-		this.elev1.addAll(scheduler.getList(1));
-		this.elev2.addAll(scheduler.getList(2));
-		this.elev3.addAll(scheduler.getList(3));
-		this.elev4.addAll(scheduler.getList(4));
+		this.elevExe.addAll(scheduler.elevTime);
+		this.floorExe.addAll(scheduler.floorTime);
+		
 		
 		try {
 			print();
@@ -44,181 +41,72 @@ public class MeasurementOutput extends Thread{
 	}
 	
 	private void print() throws IOException{
-		long sum1 = 0, sum2 = 0, sum3 = 0, sum4 = 0;
+		long elevSum = 0, floorSum = 0;
 		//will now print the results of Total, mean and median to the txt file
-		//Will go by elevator in order
-		writer.write("***Elevator 1 Process Time***\n");
-		for(int i = 0; i < elev1.size(); i++) {
-			sum1 += elev1.get(i);
-			writer.write("Process " + i + ": " + elev1.get(i) + "\n");
+		
+		writer.write("\n***Elevator Process Time***\n");
+		for(int i = 0; i < elevExe.size(); i++) {
+			elevSum += elevExe.get(i);
+			writer.write("Elevator Process " + i + ": " + elevExe.get(i) + "\n");
 			
 		}
-		Collections.sort(elev1);
-		writer.write("Process 1 Total Time: " + sum1 + "\n");
-		writer.write("Process 1 Median: " + elev1.get(elev1.size()/2));
-		long mean1 = sum1/elev1.size();
-		writer.write("\nProcess 1 Mean: " + mean1 + "\n");
-		sum1 = 0;
+		Collections.sort(elevExe);
+		writer.write("\n Elevator Proces Period: " + ELEVPERIOD);
+		writer.write("Elevator Process Total Time: " + elevSum + "\n");
+		writer.write("Elevator Process Median: " + elevExe.get(elevExe.size()/2));
+		long elevMean = elevSum/elevExe.size();
+		writer.write("\nElevator Process Mean: " + elevMean + "\n");
+		elevSum = 0;
 		
-		for(int i = 0; i < elev2.size(); i++) {
-			sum2 += elev2.get(i);
-			writer.write("Process " + i + ": " + elev2.get(i) + "\n");
+		for(int i = 0; i < floorExe.size(); i++) {
+			floorSum += floorExe.get(i);
+			writer.write("Process " + i + ": " + floorExe.get(i) + "\n");
 			
 		}
-		writer.write("***Elevator 2 Process Time***\n");
-		Collections.sort(elev2);
-		writer.write("Process 2 Total Time: " + sum2 + "\n");
-		writer.write("Process 2 Median: " + elev2.get(elev2.size()/2));
-		long mean2 = sum2/elev2.size();
-		writer.write("\nProcess 2 Mean: " + mean2 + "\n");
-		sum2 = 0;
+		writer.write("***Floor Process Process Time***\n");
+		Collections.sort(floorExe);
+		writer.write("Floor Process Total Time: " + floorSum + "\n");
+		writer.write("Floor Process Median: " + floorExe.get(floorExe.size()/2));
+		long floorMean = floorSum/floorExe.size();
+		writer.write("\nFloor Process Mean: " + floorMean + "\n");
+		floorSum = 0;
 		
-		writer.write("***Elevator 3 Process Time***\n");
+		//Mean, median, min and max have been sorted and found
+		//Using the given Periods from Iteration 4 does the system meet its deadline
 		
-		
-		for(int i = 0; i < elev3.size(); i++) {
-			sum3 += elev3.get(i);
-			writer.write("Process " + i + ": " + elev3.get(i) + "\n");
-			
+		writer.write("\n\n\n***RATE MONOTONIC ANALYSIS***\n\n\nElevator Process: Period = 100\n");
+		//Elev analysis (mean to period and max to period)
+		if(elevMean <= ELEVPERIOD) {
+			writer.write("Elevator meets its deadline with execution mean of " + elevMean +"\n");
 		}
-		Collections.sort(elev3);
-		writer.write("Process 3 Total Time: " + sum3 + "\n");
-		writer.write("Process 3 Median: " + elev3.get(elev3.size()/2));
-		long mean3 = sum1/elev1.size();
-		writer.write("\nProcess 1 Mean: " + mean3 + "\n");
-		sum3 = 0;
-		
-		writer.write("***Elevator 4 Process Time***\n");
-		
-		for(int i = 0; i < elev4.size(); i++) {
-			sum4 += elev4.get(i);
-			writer.write("Process " + i + ": " + elev4.get(i) + "\n");
-			
+		else {
+			writer.write("SCHEDULING ERROR: ELEVATOR PROCESS EXCEEDING PERIOD\n");
 		}
-		Collections.sort(elev4);
-		writer.write("Process 4 Total Time: " + sum4 + "\n");
-		writer.write("Process 4 Median: " + elev3.get(elev3.size()/2));
-		long mean4 = sum4/elev4.size();
-		writer.write("\nProcess 4 Mean: " + mean4 + "\n");
-		sum4 = 0;
-		
-		
-		//Mean, median, total have been established and stored in the text file.
-		//Now use these to analyse the system using Rate Monotonic Analysis
-		//Assuming the Period T of each process will be the mean of each.
-		
-		ArrayList<Long> temp = new ArrayList<Long>(4);
-		temp.add(mean1);
-		temp.add(mean2);
-		temp.add(mean3);
-		temp.add(mean4);
-		
-		temp.sort(Collections.reverseOrder());
-		//Means are now sorted by reverse order.
-		long tlong = 0;
-		ArrayList<Long> outTemp = new ArrayList<Long>(4);
-		tlong = temp.get(0); //get the largest mean (IE lowest priority)
-		
-		if(tlong != 0) {
-			if(tlong == mean1) {
-				firstP = 1;
-				outTemp.add(mean1);
-				
-			}
-			else if(tlong == mean2) {
-				firstP = 2;
-				outTemp.add(mean2);
-			}
-			else if(tlong == mean3) {
-				firstP = 3;
-				outTemp.add(mean3);
-			}
-			else if(tlong == mean4) {
-				firstP = 4;
-				outTemp.add(mean4);
-			}
+		if(Collections.max(elevExe) < ELEVPERIOD) {
+			writer.write("Max edge case is within max period system works as expected\n");
 		}
-		//Second Priority
-		
-		tlong = temp.get(1); 
-		
-		if(tlong != 0) {
-			if(tlong == mean1) {
-				secondP = 1;
-				outTemp.add(mean1);
-				
-			}
-			else if(tlong == mean2) {
-				secondP = 2;
-				outTemp.add(mean2);
-			}
-			else if(tlong == mean3) {
-				secondP = 3;
-				outTemp.add(mean3);
-			}
-			else if(tlong == mean4) {
-				secondP = 4;
-				outTemp.add(mean4);
-			}
-		}
-		//Third Period
-		
-		tlong = temp.get(2);
-		
-		if(tlong != 0) {
-			if(tlong == mean1) {
-				thirdP = 1;
-				outTemp.add(mean1);
-				
-			}
-			else if(tlong == mean2) {
-				thirdP = 2;
-				outTemp.add(mean2);
-			}
-			else if(tlong == mean3) {
-				thirdP = 3;
-				outTemp.add(mean3);
-			}
-			else if(tlong == mean4) {
-				thirdP = 4;
-				outTemp.add(mean4);
-			}
+		else {
+			writer.write("WARNING: Elevator Process has events exceeding period more analysis needed\n");
 		}
 		
-		tlong = temp.get(3); 
-		
-		if(tlong != 0) {
-			if(tlong == mean1) {
-				fourthP = 1;
-				outTemp.add(mean1);
-				
-			}
-			else if(tlong == mean2) {
-				fourthP = 2;
-				outTemp.add(mean2);
-			}
-			else if(tlong == mean3) {
-				fourthP = 3;
-				outTemp.add(mean3);
-			}
-			else if(tlong == mean4) {
-				fourthP = 4;
-				outTemp.add(mean4);
-			}
+		//floor process analysis
+		writer.write("Floor Process: Period = 200\n");
+		if(floorMean <= FLOORPERIOD) {
+			writer.write("Floor Process meets its deadline with execution mean of " + floorMean + "\n");
 		}
+		else {
+			writer.write("SCHEDULING ERROR: FLOOR PROCESS EXCEEDING PERIOD\n");
+		}
+		if(Collections.max(floorExe) <= FLOORPERIOD) {
+			writer.write("Max floor process time is within allowed period\n");
+		}
+		else {
+			writer.write("WARNING: FLOOR PROCESS MAY EXCEED ALLOWED PERIOD\n");
+		}
+		//done this periods analysis: Clear arrays for next period 
+		elevExe.clear();
+		floorExe.clear();
+		writer.close();	 //lk wont use it again
 		
-		//All priorities have been assigned. Each process priority should have a unique process. 
-		//Implementation allows for duplicates in the case of two P having the same mean (period) but 
-		//should be negligent in the system being worked on at the moment.
-		
-		writer.write("\n****RATE MONOTONIC ANALYSIS OF SYSTEM****\n");
-		//note outTemp array holds the mean from highest to lowest meaning lowest to highest priority
-		writer.write("*NOTE* Priorities are in descending order (1 is lowest priority)\n");
-		writer.write("Lowest Priority is Process " + firstP + " with Period of " + outTemp.get(0)/1000 + "us");
-		writer.write("Second Priority is Process " + secondP + " with Period of " + outTemp.get(1)/1000 + "us");
-		writer.write("Third Priority is Process " + thirdP + " with Period of " + outTemp.get(2)/1000 + "us");
-		writer.write("Highest Priority is Process " + fourthP + " with Period of " + outTemp.get(3)/1000 + "us");
-				
-		//system has ran for 60s. Analyze collected data
 			}
 }
