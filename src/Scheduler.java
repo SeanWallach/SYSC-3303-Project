@@ -5,6 +5,7 @@
 // containing a data array with floor and direction, then forwards it to the other client or server.
 // Last edited Feb 9th 2019
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -22,10 +23,9 @@ public class Scheduler {
 		counter1, counter2;//collections, ArrayList? 
 	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, ELEVATORPORT4 = 72,
 			PACKETSIZE = 25, SELFPORT = 219, FLOORPORT = 238;
-	public ArrayList<Long> elev1 = new ArrayList<Long>();
-    public ArrayList<Long> elev2 = new ArrayList<Long>();
-	public ArrayList<Long> elev3 = new ArrayList<Long>();
-	public ArrayList<Long> elev4 = new ArrayList<Long>();
+	public ArrayList<Long> elevTime = new ArrayList<Long>();
+    public ArrayList<Long> floorTime = new ArrayList<Long>();
+	
 
 	private long start, end;
 	
@@ -39,11 +39,11 @@ public class Scheduler {
 		t2 = new Thread(new FaultTimer(this, 2));
 		t3 = new Thread(new FaultTimer(this, 3));
 		t4 = new Thread(new FaultTimer(this, 4));
-		/*try {
+		try {
 			measure  = new MeasurementOutput(this);
 		} catch (IOException e) {
 			e.printStackTrace();
-		}*/
+		}
 		//t4?? Will fault scheduling be needed?
 		//q = new ConcurrentLinkedQueue();
 		try {
@@ -68,7 +68,7 @@ public class Scheduler {
 		t2.start();
 		t3.start();
 		t4.start();
-		//measure.start(); //run measuring
+		measure.start(); //run measuring
 	}
 
 	private int getBestElevator(int toFloor, int direction) {
@@ -135,6 +135,8 @@ public class Scheduler {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		end = System.nanoTime();
+		appendTime(2);
 		//floorBTimes.add(System.nanoTime() - fStartTime);//packet sent measure elapsed time
 		
 		System.out.println("Server: packet sent");
@@ -176,7 +178,7 @@ public class Scheduler {
 
 		//decode request and assign toFloor as the floor that will be sent to elevator
 		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3 || fromPort == ELEVATORPORT4) {
-			//long start = System.nanoTime();
+			
 			//received from elevator
 			
 			start = System.nanoTime();
@@ -258,21 +260,19 @@ public class Scheduler {
 					}
 					return;
 				}
-				elevatorState4 = data[1];
-				elevatorFloor4 = currFloor;
+				elevatorState1 = data[1];
+				elevatorFloor1 = currFloor;
 				
 				System.out.println("\n Updating E4: "+ elevatorState4+ ", "+elevatorFloor4+ "\n");
 				if(elevatorState1 == 4)
 					System.out.println("Elevator4 Jammed::: ERROR");
 			}	
 
-			//Sending packet to floor
+			
 			msg[0] = data[0];
-			msg[1] = data[2];
-			msg[2] = data[3];
-			System.out.println("");
-			if(data[1] == 0) {//only send if elevator arrived
-				
+			msg[1] = data[1];
+			msg[2] = data[2];
+			if(data[1] == 0) {
 				sendPacket = new DatagramPacket(msg, msg.length,
 						receivePacket.getAddress(), FLOORPORT);
 				try {
@@ -286,7 +286,7 @@ public class Scheduler {
 			
 			//elevator process finished access a critical data structure and append process time;
 			
-			appendTime(data[0]);
+			appendTime(1);
 			
 			
 		}
@@ -346,33 +346,13 @@ public class Scheduler {
 	}
 	private synchronized void appendTime(int in) {
 		if(in == 1) {
-			elev1.add(end - start);
+			elevTime.add(end - start);
 		}
-		if(in == 1) {
-			elev2.add(end - start);
-		}
-		if(in == 3) {
-			elev3.add(end - start);
-		}
-		if(in == 4) {
-			elev4.add(end - start);
+		if(in == 2) {
+			floorTime.add(end - start);
 		}
 	}
-	public synchronized ArrayList<Long> getList(int in) {
-		//using a synchronized function for measurment output class to be able to access the data structure without conflicting with local appending to the data structure
-		if(in == 1) {
-			return elev1;
-		}
-		if(in == 1) {
-			return elev2;
-		}
-		if(in == 3) {
-			return elev3;
-		}
-		else {
-			return elev4;
-		}
-	}
+	
 	public static void main( String args[] )
 	{
 		
