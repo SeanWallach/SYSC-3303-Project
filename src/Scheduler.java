@@ -172,7 +172,7 @@ public class Scheduler {
 		int len = receivePacket.getLength();
 		System.out.println("Length: " + len);
 		System.out.print("Containing: " );
-		System.out.println(this.receivePacket.getData());
+		System.out.println(data[0] + " " + data[1] + " " + data[2] + " " + data[3]);
 
 		//decode request and assign toFloor as the floor that will be sent to elevator
 		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3 || fromPort == ELEVATORPORT4) {
