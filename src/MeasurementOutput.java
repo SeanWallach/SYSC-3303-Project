@@ -33,7 +33,9 @@ public class MeasurementOutput extends Thread{
 		
 		
 		try {
-			print();
+			if(!elevExe.isEmpty() && !floorExe.isEmpty()) {
+				print();
+			}
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
