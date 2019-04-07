@@ -26,6 +26,7 @@ public class Scheduler {
     public ArrayList<Long> elev2 = new ArrayList<Long>();
 	public ArrayList<Long> elev3 = new ArrayList<Long>();
 	public ArrayList<Long> elev4 = new ArrayList<Long>();
+	public ArrayList<Long> floorButtons = new ArrayList<Long>();
 
 	private long start, end;
 	
@@ -39,11 +40,12 @@ public class Scheduler {
 		t2 = new Thread(new FaultTimer(this, 2));
 		t3 = new Thread(new FaultTimer(this, 3));
 		t4 = new Thread(new FaultTimer(this, 4));
-		/*try {
+		try {
 			measure  = new MeasurementOutput(this);
+			measure.start();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}*/
+		}
 		//t4?? Will fault scheduling be needed?
 		//q = new ConcurrentLinkedQueue();
 		try {
@@ -172,7 +174,7 @@ public class Scheduler {
 		int len = receivePacket.getLength();
 		System.out.println("Length: " + len);
 		System.out.print("Containing: " );
-		System.out.println(data[0] + " " + data[1] + " " + data[2] + " " + data[3]);
+		System.out.println(this.receivePacket.getData());
 
 		//decode request and assign toFloor as the floor that will be sent to elevator
 		if(fromPort == ELEVATORPORT1 || fromPort == ELEVATORPORT2 || fromPort == ELEVATORPORT3 || fromPort == ELEVATORPORT4) {
@@ -316,6 +318,8 @@ public class Scheduler {
 			int toElevator = getBestElevator(toFloor, direction);
 			msg[0] = (byte)toElevator;
 			sendElevator(toElevator, toFloor, msg);
+			end = System.nanoTime();
+			appendTime(5);
 			System.out.println( "Server: Sending packet:");
 			System.out.println("To host: " + sendPacket.getAddress());
 			System.out.println("Destination host port: " + sendPacket.getPort());
@@ -348,14 +352,17 @@ public class Scheduler {
 		if(in == 1) {
 			elev1.add(end - start);
 		}
-		if(in == 1) {
+		else if(in == 1) {
 			elev2.add(end - start);
 		}
-		if(in == 3) {
+		else if(in == 3) {
 			elev3.add(end - start);
 		}
-		if(in == 4) {
+		else if(in == 4) {
 			elev4.add(end - start);
+		}
+		else if(in == 5) {
+			floorButtons.add(end-start);
 		}
 	}
 	public synchronized ArrayList<Long> getList(int in) {
@@ -363,14 +370,17 @@ public class Scheduler {
 		if(in == 1) {
 			return elev1;
 		}
-		if(in == 1) {
+		else if(in == 1) {
 			return elev2;
 		}
-		if(in == 3) {
+		else if(in == 3) {
 			return elev3;
 		}
-		else {
+		else if(in == 4) {
 			return elev4;
+		}
+		else{
+			return floorButtons;
 		}
 	}
 	public static void main( String args[] )
@@ -383,4 +393,3 @@ public class Scheduler {
 		}
 	}
 }
-

@@ -14,7 +14,7 @@ public class Floor {
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendReceiveSocket;
 
-	static String fileName = ".//input.txt";
+	//static String fileName = ".//input.txt";
 
 	static int SCHEDULER_PORT = 219, SELFPORT = 238;
 	static String temp;
@@ -89,7 +89,7 @@ public class Floor {
 
 	public void verify(int floor) {
 		int i = 0;
-		System.out.println("VERIFY: Floor: " + floor + ", index: " + index + ", i:" + i);
+		//System.out.println("VERIFY: Floor: " + floor + ", index: " + index + ", i:" + i);
 		while (request.size() != 0 && i <= index) {
 			if (request.get(i) == floor) {
 				System.out.println("getting request");
