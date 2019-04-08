@@ -27,7 +27,6 @@ public class Elev extends Thread {
 	public boolean functioning; // service state
 	public ArrayList<Integer> elevLamp;
 
-	// new this itteration
 	private boolean passenger;
 	private Elev_Gui gui;
 
@@ -107,7 +106,7 @@ public class Elev extends Thread {
 					if (this.currentFloor == this.serviceQueue.get(0)) {// destination
 						this.serviceQueue.remove(0);
 						elevLamp = this.serviceQueue;
-						if (this.serviceQueue.isEmpty())
+						if (this.serviceQueue.isEmpty()) 
 							this.motor = 0;
 						this.sendRequest(this.currentFloor, 0);
 						System.out.println(
