@@ -3,10 +3,12 @@ import java.util.Date;
 public class FaultTimer extends Thread {
 	private Scheduler s;
 	private int preState, preFloor, elevator;
+	private boolean E1Broken, E2Broken, E3Broken, E4Broken;
 
 	public FaultTimer(Scheduler s, int elev) {
 		this.s = s;
 		elevator = elev;
+
 	}
 
 	public void run() {
@@ -38,6 +40,8 @@ public class FaultTimer extends Thread {
 						System.out.println("smt broke");
 						s.elevatorState1 = 3;
 						s.isActive1 = false;
+						s.malHandler = new MalfunctionHandler(s, s.E1Requests);
+						s.malHandler.start();
 						System.out.println("^^^ERROR: ELEVATOR 1 BROKEN^^^^");
 					}
 					else {
@@ -50,6 +54,8 @@ public class FaultTimer extends Thread {
 						System.out.println("smt broke");
 						s.elevatorState2 = 3;
 						s.isActive2 = false;
+						s.malHandler = new MalfunctionHandler(s, s.E2Requests);
+						s.malHandler.start();
 						System.out.println("^^^ERROR: ELEVATOR 2 BROKEN^^^^");
 
 					}
@@ -64,6 +70,8 @@ public class FaultTimer extends Thread {
 						System.out.println("smt broke");
 						s.elevatorState3 = 3;
 						s.isActive3 = false;
+						s.malHandler = new MalfunctionHandler(s, s.E3Requests);
+						s.malHandler.start();
 						System.out.println("^^^ERROR: ELEVATOR 3 BROKEN^^^^");
 
 					}
@@ -78,6 +86,8 @@ public class FaultTimer extends Thread {
 						System.out.println("smt broke");
 						s.elevatorState4 = 3;
 						s.isActive4 = false;
+						s.malHandler = new MalfunctionHandler(s, s.E3Requests);
+						s.malHandler.start();
 						System.out.println("^^^ERROR: ELEVATOR 4 BROKEN^^^^");
 					}
 					else {

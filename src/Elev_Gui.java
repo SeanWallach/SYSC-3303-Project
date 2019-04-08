@@ -19,7 +19,7 @@ public class Elev_Gui {
 	private JButton[] floor;
 	private JButton[] fButton;
 	private JButton[] door;
-	private JTextField tf;
+	public JTextField tf;
 
 	// temporary test variables
 	private int count;

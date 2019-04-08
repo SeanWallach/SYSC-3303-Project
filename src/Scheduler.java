@@ -14,6 +14,11 @@ public class Scheduler {
     
 	DatagramPacket sendPacket, receivePacket;
 	DatagramSocket sendSocket, receiveSocket;
+	public ArrayList<Integer> E1Requests = new ArrayList<Integer>();
+	public ArrayList<Integer> E2Requests = new ArrayList<Integer>();
+	public ArrayList<Integer> E3Requests = new ArrayList<Integer>();
+	public ArrayList<Integer> E4Requests = new ArrayList<Integer>();
+	public MalfunctionHandler malHandler;
 	Thread t1, t2, t3, t4, measure; //threads for monitoring elevators
 	Date currentDate; 
 	Boolean isActive1 = true, isActive2 = true, isActive3 = true, isActive4 = true; //To keep track of which elevators are talking to the scheduler
@@ -35,6 +40,7 @@ public class Scheduler {
 		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; 
 		elevatorFloor2 = 0; elevatorFloor3 = 0; counter1 = 0; counter2 = 0;
 		elevatorState4 = 0; elevatorFloor4 = 0;//all elevators should be idle at startup
+		
 		
 		t1 = new Thread(new FaultTimer(this, 1));
 		t2 = new Thread(new FaultTimer(this, 2));
@@ -268,21 +274,30 @@ public class Scheduler {
 					System.out.println("Elevator4 Jammed::: ERROR");
 			}	
 
+			//decodeing elevator floor at
+			int floorRequest0 = data[1];
+			int floorRequest1 = data[2];
+			int atFloor=0;
+			if(floorRequest0 == 0) {
+				atFloor = floorRequest1;
+			}
+			else if (floorRequest0 == 1){
+				atFloor = floorRequest1 + 10;
+			}
+			else if (floorRequest0 == 2) {
+				atFloor = floorRequest1 + 20;
+			}
 			//Sending packet to floor
 			msg[0] = data[0];
 			msg[1] = data[2];
 			msg[2] = data[3];
 			System.out.println("");
 			if(data[1] == 0) {//only send if elevator arrived
-				
-				sendPacket = new DatagramPacket(msg, msg.length,
-						receivePacket.getAddress(), FLOORPORT);
-				try {
-					sendSocket.send(sendPacket);
-				} catch (IOException e) {
-					e.printStackTrace();
-					System.exit(1);
-				}
+				if(data[0]==1 && E1Requests.size()>0)E1Requests.remove((Object)atFloor);
+				if(data[0]==2 && E2Requests.size()>0)E2Requests.remove((Object)atFloor);
+				if(data[0]==3 && E3Requests.size()>0)E3Requests.remove((Object)atFloor);
+				if(data[0]==4 && E4Requests.size()>0)E4Requests.remove((Object)atFloor);
+				toFloor(msg);
 			}
 			end = System.nanoTime();
 			
@@ -316,6 +331,11 @@ public class Scheduler {
 			msg[5] = data[4];
 			
 			int toElevator = getBestElevator(toFloor, direction);
+			//add list of requests
+			if(toElevator == 1) E1Requests.add(toFloor);
+			if(toElevator == 2) E2Requests.add(toFloor);
+			if(toElevator == 3) E3Requests.add(toFloor);
+			if(toElevator == 4) E4Requests.add(toFloor);
 			msg[0] = (byte)toElevator;
 			sendElevator(toElevator, toFloor, msg);
 			end = System.nanoTime();
@@ -332,7 +352,17 @@ public class Scheduler {
 		}
 	}
 
-	
+	public synchronized void toFloor(byte[] msg) {
+		System.out.println("Sending : " +msg[0] + " "+ msg[1] + " " + msg[2]);
+		sendPacket = new DatagramPacket(msg, msg.length,
+				receivePacket.getAddress(), FLOORPORT);
+		try {
+			sendSocket.send(sendPacket);
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+	}
 
 
 	@SuppressWarnings("deprecation")

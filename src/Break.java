@@ -79,13 +79,13 @@ public class Break extends Thread {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				 //this.jam(chosen);
+				 this.jam(chosen);
 			}
 
 			else if (i==0) {//shut down elevator
 
 				try {
-					Thread.sleep(5000);
+					Thread.sleep(0);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

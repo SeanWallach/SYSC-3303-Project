@@ -129,8 +129,14 @@ public class Floor {
 		} else {
 			eleFloor = temp[2];
 		}
+		if(temp[0]==5) {
+			gui.clearButton(eleFloor);
+		}
+		else {
+			this.verify(eleFloor);///////////////////////////////////////////////////
+		}
 		System.out.println("received: Floor" + eleFloor);
-		this.verify(eleFloor);///////////////////////////////////////////////////
+		
 		// gui.clearButton(eleFloor);
 
 		System.out.print("Received content containing: ");

@@ -1,60 +1,43 @@
 ***Elevator 1 Process Time***
-Requst 0: 232300
-Requst 1: 45800
-Requst 2: 26500
-Requst 3: 26200
-Requst 4: 24601
-Requst 5: 24401
-Requst 6: 96400
-Requst 7: 26401
-Elevator 1 Task Total Time: 502603
-Elevator 1 Task Median: 26500
-Elevator 1 Task Mean: 62825
+Requst 0: 137500
+Requst 1: 34100
+Requst 2: 23201
+Requst 3: 22799
+Requst 4: 52599
+Requst 5: 19999
+Requst 6: 29899
+Requst 7: 20999
+Elevator 1 Task Total Time: 341096
+Elevator 1 Task Median: 29899
+Elevator 1 Task Mean: 42637
 ***
 
 Elevator 2 Process Time***
-Request 0: 80400
-Request 1: 59399
-Request 2: 40700
-Request 3: 36200
-Elevator 2 Task Total Time: 216699
-Elevator 2 Task Median: 59399
-Elevator 2 Task Mean: 54174
+Request 0: 155300
+Elevator 2 Task Total Time: 155300
+Elevator 2 Task Median: 155300
+Elevator 2 Task Mean: 155300
 ***
 
 Elevator 3 Process Time***
-Request 0: 116899
-Request 1: 121499
-Request 2: 26200
-Request 3: 33000
-Request 4: 189100
-Request 5: 34001
-Request 6: 16401
-Elevator 3 Task Total Time: 537100
-Elevator 3 Task Median: 34001
-Elevator 3 Task Mean: 71800
+Request 0: 140600
+Elevator 3 Task Total Time: 140600
+Elevator 3 Task Median: 140600
+Elevator 3 Task Mean: 341096
 **
 
 *Elevator 4 Process Time***
-Request 0: 125800
-Request 1: 21800
-Request 2: 20700
-Request 3: 27899
-Request 4: 196500
-Request 5: 22900
-Elevator 4 Task Total Time: 415599
-Elevator 4 Task Median: 27899
-Elevator 4 Task Mean: 69266
+Request 0: 151600
+Elevator 4 Task Total Time: 151600
+Elevator 4 Task Median: 151600
+Elevator 4 Task Mean: 151600
 ***
 
 Floor Button Process Time***
-Process 0: 80400
-Process 1: 59399
-Process 2: 40700
-Process 3: 36200
-Floor Button task Total Time: 216699
-Floor Button Median: 59399
-Floor Button Mean: 54174
+Request 0: 155300
+Floor Button task Total Time: 155300
+Floor Button Median: 155300
+Floor Button Mean: 155300
 
 
-Total Elevator Time: 1672001
+Total Elevator Time: 788596
