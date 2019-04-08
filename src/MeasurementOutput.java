@@ -28,7 +28,7 @@ public class MeasurementOutput extends Thread {
 	public void run() {
 		// 60 second period for analysis
 		try {
-			sleep(10000);
+			sleep(60000);
 		} catch (InterruptedException e1) {
 
 			e1.printStackTrace();

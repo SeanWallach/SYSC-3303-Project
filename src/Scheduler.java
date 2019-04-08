@@ -114,7 +114,7 @@ public class Scheduler {
 		return getBestElevator(toFloor, direction);
 	}
 
-	private void sendElevator(int elev, int floor, byte msg[]) {
+	public void sendElevator(int elev, int floor, byte msg[]) {
 		//from the best elevator create the correct packet and send 
 		//correct data
 		int toPort;
@@ -134,8 +134,13 @@ public class Scheduler {
 			elevatorState1=msg[1];
 		}
 		
-		sendPacket = new DatagramPacket(msg, msg.length,
-				receivePacket.getAddress(), 68);
+		try {
+			sendPacket = new DatagramPacket(msg, msg.length,
+					InetAddress.getLocalHost(), 68);
+		} catch (UnknownHostException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		// Send the datagram packet to the client via the send socket. 
 		try {
 			sendSocket.send(sendPacket);
@@ -154,8 +159,8 @@ public class Scheduler {
 		// to 100 bytes long (the length of the byte array).
 		updateDate();
 		int toFloor = 0;
-		byte data[] = new byte[PACKETSIZE];
-		byte msg[] = new byte[PACKETSIZE];
+		byte data[] = new byte[PACKETSIZE];//recieve
+		byte msg[] = new byte[PACKETSIZE];//send
 		receivePacket = new DatagramPacket(data, data.length);
 		System.out.println("Scheduler: Waiting for Packet.\n");
 
@@ -374,6 +379,11 @@ public class Scheduler {
 		t3.stop();
 		t4.stop();
 		System.exit(1);
+	}
+	
+	void close() {
+		receiveSocket.close();
+		sendSocket.close();
 	}
 	void updateDate() {
 		currentDate = new Date();

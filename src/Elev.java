@@ -238,6 +238,10 @@ public class Elev extends Thread {
 		// System.out.println("Packet sent to Scheduler");
 	}
 
+	void close() {
+		sendSocket.close();
+	}
+	
 	public void run() {
 		try {
 			this.service();

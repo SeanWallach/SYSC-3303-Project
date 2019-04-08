@@ -7,6 +7,7 @@ public class Elevator {
 
 	private int SEND_PORT_NUMBER = 219; // schedualer port
 	private DatagramSocket receive;
+	public DatagramPacket testPacket;
 
 	private static Elev elev1;
 	private static Elev elev2;
@@ -37,6 +38,7 @@ public class Elevator {
 		try {
 			System.out.println("Waiting...\n"); // so we know we're waiting
 			receive.receive(receivePacket);
+			testPacket=receivePacket;
 		} catch (IOException e) {
 			System.out.print("IO Exception: likely:");
 			System.out.println("Receive Socket Timed Out.\n" + e);
@@ -93,6 +95,10 @@ public class Elevator {
 
 	public void run() {
 		this.receiver();
+	}
+	
+	void close() {
+		receive.close();
 	}
 
 	public static void main(String[] args) {

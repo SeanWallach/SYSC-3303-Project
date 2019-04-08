@@ -46,7 +46,7 @@ public class Floor {
 			System.exit(1);
 		}
 
-		this.receiveMessage();
+		
 	}
 
 	public void sendInstructions(int floor, int direction) {
@@ -131,6 +131,7 @@ public class Floor {
 		}
 		if(temp[0]==5) {
 			gui.clearButton(eleFloor);
+			
 		}
 		else {
 			this.verify(eleFloor);///////////////////////////////////////////////////
@@ -144,9 +145,14 @@ public class Floor {
 		String received = new String(temp, 0, receivePacket.getLength());
 		System.out.println(received);
 	}
+	
+	void close() {
+		sendReceiveSocket.close();
+	}
 
 	public static void main(String args[]) {
 		Floor Floors = new Floor(22, SELFPORT);
+		Floors.receiveMessage();
 
 	}
 }
