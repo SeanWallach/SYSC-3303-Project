@@ -35,7 +35,6 @@ class Connectiontest {
 		Elevator E = new Elevator();
 		Scheduler s= new Scheduler();
 		Elev e = new Elev(1, 22, 69, E);
-		Floor f = new Floor(22, 238);
 		s.receiveAndSend();
 		byte[] test = {1, 0, 0, 1};
 		byte[] rTest = s.receivePacket.getData();
