@@ -1,0 +1,82 @@
+
+***Elevator Request Time***
+Elevator Request 0: 138100
+Elevator Request 1: 144400
+Elevator Request 2: 145500
+Elevator Request 3: 138800
+Elevator Request 4: 34200
+Elevator Request 5: 40400
+Elevator Request 6: 31500
+Elevator Request 7: 128700
+Elevator Request 8: 18700
+Elevator Request 9: 21500
+Elevator Request 10: 33200
+Elevator Request 11: 25000
+Elevator Request 12: 47200
+Elevator Request 13: 18600
+Elevator Request 14: 22400
+Elevator Request 15: 23600
+Elevator Request 16: 16100
+Elevator Request 17: 57900
+Elevator Request 18: 20200
+Elevator Request 19: 19400
+Elevator Request 20: 63000
+Elevator Request 21: 35100
+Elevator Request 22: 13300
+Elevator Request 23: 101000
+Elevator Request 24: 24000
+Elevator Request 25: 58600
+Elevator Request 26: 10800
+Elevator Request 27: 26800
+Elevator Request 28: 21000
+Elevator Request 29: 17300
+Elevator Request 30: 25700
+Elevator Request 31: 11100
+Elevator Request 32: 11200
+Elevator Request 33: 14800
+Elevator Request 34: 61200
+Elevator Request 35: 10800
+Elevator Request 36: 117200
+Elevator Request 37: 148000
+Elevator Request 38: 110900
+Elevator Request 39: 10700
+Elevator Request 40: 52300
+Elevator Request 41: 63300
+Elevator Request 42: 68400
+Elevator Request 43: 25000
+Elevator Request 44: 14200
+Elevator Request 45: 9900
+Elevator Request 46: 16100
+Elevator Request 47: 100700
+Elevator Request 48: 210400
+Elevator Request 49: 81600
+Elevator Request 50: 228200
+Elevator Request 51: 17700
+Elevator Request 52: 134400
+
+Elevator Proces Period: 50000
+Elevator Request Total Time: 3040100
+Elevator Request Median: 31500
+Elevator Request Mean: 57360
+
+
+***Floor Request Request Time***
+Request 0: 7678800
+Request 1: 158900
+Request 2: 163000
+Request 3: 126800
+Floor Request Total Time: 8127500
+Floor Request Median: 163000
+Floor Request Mean: 2031875
+
+
+
+***RATE MONOTONIC ANALYSIS***
+
+
+Elevator Request: Period = 100
+SCHEDULING ERROR: ELEVATOR Request EXCEEDING PERIOD
+WARNING: Elevator Request has events exceeding period more analysis needed
+Floor Request: Period = 200
+SCHEDULING ERROR: FLOOR Request EXCEEDING PERIOD
+WARNING: FLOOR Request MAY EXCEED ALLOWED PERIOD
