@@ -27,7 +27,7 @@ public class MeasurementOutput extends Thread {
 	public void run() {
 		// 60 second period for analysis
 		try {
-			Thread.sleep(60000);
+			Thread.sleep(20000);
 		} catch (InterruptedException e1) {
 
 			e1.printStackTrace();
@@ -57,7 +57,6 @@ public class MeasurementOutput extends Thread {
 
 		}
 		Collections.sort(elevExe);
-		writer.write("\nElevator Proces Period: " + ELEVPERIOD);
 		writer.write("\nElevator Request Total Time: " + elevSum + "\n");
 		writer.write("Elevator Request Median: " + elevExe.get(elevExe.size() / 2));
 		long elevMean = elevSum / elevExe.size();
