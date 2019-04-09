@@ -1,3 +1,4 @@
+package Systems;
 import java.util.Random;
 
 public class Break extends Thread {
@@ -14,6 +15,7 @@ public class Break extends Thread {
 		go = true;
 	}
 
+	//jam elevator 
 	public void jam(int elevNum) {
 
 		if (elevNum == 1) {
@@ -57,6 +59,7 @@ public class Break extends Thread {
 	}
 
 	public void chaos() {
+		//sleep for 10s
 		try {
 			Thread.sleep(10000);
 		} catch (InterruptedException e) {
@@ -68,12 +71,12 @@ public class Break extends Thread {
 		//randomly select which elevator to jam and shutdown and when
 		Random ran = new Random();
 		for (int i = 0; i < 2; i++) {
-			int chosen = ran.nextInt(4) + 1; // 1-3
-			int time = (ran.nextInt(8) + 1) * 1000; // 1-10 seconds
+			int chosen = ran.nextInt(4) + 1; //select a random elevastor
+			int time = (ran.nextInt(8) + 1) * 1000; //wait  1-10 seconds
 
 			if (i == 1) {//create jam
 
-				try {
+				try {//sleep time then call jam
 					Thread.sleep(time);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
@@ -84,14 +87,14 @@ public class Break extends Thread {
 
 			else if (i==0) {//shut down elevator
 
-				try {
-					Thread.sleep(0);
+				try {//sleep time then stop an elevator 
+					Thread.sleep(time);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
-				this.stopElev(1);
+				this.stopElev(chosen);
 
 			}
 

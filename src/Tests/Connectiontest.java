@@ -1,6 +1,13 @@
+package Tests;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+
+import Systems.Elev;
+import Systems.Elevator;
+import Systems.Floor;
+import Systems.Scheduler;
 
 class Connectiontest {
 

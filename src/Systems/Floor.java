@@ -1,3 +1,4 @@
+package Systems;
 
 //This class is the floor for the project
 //Last edited 3/23/2019
@@ -11,8 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Floor {
-	DatagramPacket sendPacket, receivePacket;
-	DatagramSocket sendReceiveSocket;
+	public DatagramPacket sendPacket, receivePacket;
+	public DatagramSocket sendReceiveSocket;
 
 	//static String fileName = ".//input.txt";
 
@@ -23,7 +24,7 @@ public class Floor {
 	Floor_Gui gui;
 
 	int elevatorDirection; // 0 is stop, 1 up, 2 down
-	int numOfFloors;
+	public int numOfFloors;
 	// private int[] request;
 	private ArrayList<Integer> request = new ArrayList<Integer>();
 	private int index;
@@ -56,6 +57,7 @@ public class Floor {
 		request.add(floor);
 		// requestWaiting = false;
 
+		//get floor from packet
 		byte msg[] = new byte[5]; // Bit 0 - Direction Bit 1,2 - destination Floor
 		msg[0] = (byte) direction;
 		if (floor >= 20) {
@@ -70,6 +72,7 @@ public class Floor {
 		}
 		msg[3] = 0;
 		msg[4] = 0;
+		//print message being send and send
 		System.out.print(msg[0] + " " + msg[1] + " " + msg[2] + "\n");
 		try {
 			sendPacket = new DatagramPacket(msg, msg.length, InetAddress.getLocalHost(), SCHEDULER_PORT);
@@ -86,7 +89,8 @@ public class Floor {
 		System.out.println("\nElevator request sent.\n");
 
 	}
-
+	
+	//determine if elevator that arrived at floor came due to a request from the floor
 	public void verify(int floor) {
 		int i = 0;
 		//System.out.println("VERIFY: Floor: " + floor + ", index: " + index + ", i:" + i);
@@ -120,6 +124,7 @@ public class Floor {
 			e.printStackTrace();
 			System.exit(1);
 		}
+		//get floor number from packet
 		System.out.print(temp[0] + " " + temp[1] + " " + temp[2] + "\n");
 		int eleFloor = 0;
 		if (temp[1] == 2) {
@@ -146,7 +151,7 @@ public class Floor {
 		System.out.println(received);
 	}
 	
-	void close() {
+	public void close() {
 		sendReceiveSocket.close();
 	}
 

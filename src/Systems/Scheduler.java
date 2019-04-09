@@ -1,3 +1,4 @@
+package Systems;
 // Scheduler.java
 // Maveric Garde 101031617
 // This class is the Intermediate of a Client/Server UDP client on
@@ -12,41 +13,42 @@ import java.util.*;
 public class Scheduler {
     //ConcurrentLinkedQueue q;
     
-	DatagramPacket sendPacket, receivePacket;
-	DatagramSocket sendSocket, receiveSocket;
+	public DatagramPacket sendPacket, receivePacket;
+	public DatagramSocket sendSocket, receiveSocket;
+	//requests being send to elevator
 	public ArrayList<Integer> E1Requests = new ArrayList<Integer>();
 	public ArrayList<Integer> E2Requests = new ArrayList<Integer>();
 	public ArrayList<Integer> E3Requests = new ArrayList<Integer>();
 	public ArrayList<Integer> E4Requests = new ArrayList<Integer>();
+	//malFucntion handler
 	public MalfunctionHandler malHandler;
-	Thread t1, t2, t3, t4, measure; //threads for monitoring elevators
+	public Thread t1, t2, t3, t4, measure; //threads for monitoring elevators
 	Date currentDate; 
 	Boolean isActive1 = true, isActive2 = true, isActive3 = true, isActive4 = true; //To keep track of which elevators are talking to the scheduler
-	int elevatorState1, elevatorState2, elevatorState3, elevatorState4,//will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
+	public int elevatorState1, elevatorState2, elevatorState3, elevatorState4,//will have to turn these into thread safe ----- 0 is idle 1 is up 2 is down
 		elevatorFloor1, elevatorFloor2, elevatorFloor3, elevatorFloor4,
 		counter1, counter2;//collections, ArrayList? 
 	static int ELEVATORPORT1 = 69, ELEVATORPORT2 = 70, ELEVATORPORT3 = 71, ELEVATORPORT4 = 72,
 			PACKETSIZE = 25, SELFPORT = 219, FLOORPORT = 238;
-	public ArrayList<Long> elev1 = new ArrayList<Long>();
-    public ArrayList<Long> elev2 = new ArrayList<Long>();
-	public ArrayList<Long> elev3 = new ArrayList<Long>();
-	public ArrayList<Long> elev4 = new ArrayList<Long>();
+	public ArrayList<Long> elevTime = new ArrayList<Long>();
 	public ArrayList<Long> floorButtons = new ArrayList<Long>();
 
 	private long start, end;
 	
 	public Scheduler() 
 	{
+		//set intial sates
 		elevatorState1 = 0; elevatorState2 = 0; elevatorState3 = 0; elevatorFloor1 = 0; 
 		elevatorFloor2 = 0; elevatorFloor3 = 0; counter1 = 0; counter2 = 0;
 		elevatorState4 = 0; elevatorFloor4 = 0;//all elevators should be idle at startup
 		
-		
+		//create the fault timer threads to check if an elevator br
 		t1 = new Thread(new FaultTimer(this, 1));
 		t2 = new Thread(new FaultTimer(this, 2));
 		t3 = new Thread(new FaultTimer(this, 3));
 		t4 = new Thread(new FaultTimer(this, 4));
 		try {
+			//run the measurements
 			measure  = new MeasurementOutput(this);
 			measure.start();
 		} catch (IOException e) {
@@ -79,7 +81,7 @@ public class Scheduler {
 		//measure.start(); //run measuring
 	}
 
-	private int getBestElevator(int toFloor, int direction) {
+	public int getBestElevator(int toFloor, int direction) {
 		//from current data which elevator is best to send
 		//check to see if any elevator status is marked as idle. Easy Out;
 		if(elevatorState1 == 0 && isActive1) return 1;
@@ -308,7 +310,7 @@ public class Scheduler {
 			
 			//elevator process finished access a critical data structure and append process time;
 			
-			appendTime(data[0]);
+			appendTime(0);
 			
 			
 		}
@@ -381,48 +383,19 @@ public class Scheduler {
 		System.exit(1);
 	}
 	
-	void close() {
+	public void close() {
 		receiveSocket.close();
 		sendSocket.close();
 	}
 	void updateDate() {
 		currentDate = new Date();
 	}
-	private synchronized void appendTime(int in) {
-		if(in == 1) {
-			elev1.add(end - start);
-		}
-		else if(in == 1) {
-			elev2.add(end - start);
-		}
-		else if(in == 3) {
-			elev3.add(end - start);
-		}
-		else if(in == 4) {
-			elev4.add(end - start);
-		}
-		else if(in == 5) {
-			floorButtons.add(end-start);
-		}
+	private synchronized void appendTime(int i) { 
+		if(i==5)floorButtons.add(end-start);
+		else elevTime.add(end - start);
+		
 	}
-	public synchronized ArrayList<Long> getList(int in) {
-		//using a synchronized function for measurment output class to be able to access the data structure without conflicting with local appending to the data structure
-		if(in == 1) {
-			return elev1;
-		}
-		else if(in == 1) {
-			return elev2;
-		}
-		else if(in == 3) {
-			return elev3;
-		}
-		else if(in == 4) {
-			return elev4;
-		}
-		else{
-			return floorButtons;
-		}
-	}
+
 	public static void main( String args[] )
 	{
 		

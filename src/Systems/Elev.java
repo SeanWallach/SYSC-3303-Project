@@ -1,3 +1,4 @@
+package Systems;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -15,7 +16,7 @@ public class Elev extends Thread {
 
 	private int[] buttons;
 	private int currentFloor; // 1 is default
-	private ArrayList<Integer> serviceQueue; // floors that will be serviced in organized order
+	public ArrayList<Integer> serviceQueue; // floors that will be serviced in organized order
 	public boolean requestWaiting;
 
 	private int SEND_PORT_NUMBER = 219; // schedualer port
@@ -31,7 +32,7 @@ public class Elev extends Thread {
 	private Elev_Gui gui;
 
 	public Elev(int elevNum, int floors, int port, Elevator thisController) {
-		this.contorller = thisController;
+		
 		requestWaiting = false;
 		buttons = new int[floors];
 		for (int i = 1; i <= floors; i++) {
@@ -238,8 +239,13 @@ public class Elev extends Thread {
 		// System.out.println("Packet sent to Scheduler");
 	}
 
-	void close() {
+	public void close() {
 		sendSocket.close();
+	}
+	
+	//FOR TESTING ONLY
+	public void setMotor(int direction) {
+		this.motor=direction;
 	}
 	
 	public void run() {

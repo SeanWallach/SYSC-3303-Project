@@ -1,3 +1,4 @@
+package Systems;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -15,14 +16,16 @@ public class MalfunctionHandler extends Thread {
 
 
 	public MalfunctionHandler(Scheduler sched, ArrayList<Integer> list) {
+		//get scheduler and list of requests from elevator that broke down
 		s = sched;
 		Requests.addAll(list);
 	}
 
 	public void run() {
-		System.out.println("\n\n\n\n\nFIXING\n\n\n\n");
+		//System.out.println("\n\n\n\n\nFIXING\n\n\n\n");
 		byte[] msg = new byte[3];
-
+		
+		//for each request in the queue decode it into bytes
 		for (int i = 0; i < Requests.size(); i++) {
 			msg[0] = 5;
 			if (Requests.get(i) < 10) {
@@ -39,6 +42,8 @@ public class MalfunctionHandler extends Thread {
 				msg[2] = (byte) (num - 20);
 			}
 			
+			
+			//send the message 
 			try {
 				sentSocket = new DatagramSocket();
 			} catch (SocketException e1) {

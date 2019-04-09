@@ -1,3 +1,4 @@
+package Systems;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -97,7 +98,7 @@ public class Elevator {
 		this.receiver();
 	}
 	
-	void close() {
+	public void close() {
 		receive.close();
 	}
 
